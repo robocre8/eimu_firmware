@@ -1,0 +1,5 @@
+# Easy IMU Version 2(EIMU_V2) Firmware
+This is the code running on the microcontroller on the **Easy PID Motor Controller** (**L298N EPMC Module**).
+
+- it is a PlatformIO file.
+- It uses ESP32 C3
