@@ -3,332 +3,380 @@
 
 #include "command_functions.h"
 
-String dataMsg = "", dataMsgBuffer = "", dataMsgBufferArray[3];
-String sendMsg = "";
 
+void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 
-void recieve_and_send_data(){
-  int indexPos = 0, i = 0;
-
-  if (Serial.available() > 0)
-  {
-    while (Serial.available())
-    {
-      dataMsg = Serial.readString();
-    }
-    dataMsg.trim();
-    if (dataMsg != "")
-    {
-      do
-      {
-        indexPos = dataMsg.indexOf(',');
-        if (indexPos != -1)
-        {
-          dataMsgBuffer = dataMsg.substring(0, indexPos);
-          dataMsg = dataMsg.substring(indexPos + 1, dataMsg.length());
-          dataMsgBufferArray[i] = dataMsgBuffer;
-          dataMsgBuffer = "";
-        }
-        else
-        {
-          if (dataMsg.length() > 0)
-            dataMsgBufferArray[i] = dataMsg;
-        }
-        i += 1;
-      } while (indexPos >= 0);
+  gpio_set_level((gpio_num_t)LED_BUILTIN, 1);
+  switch (cmd) {
+    case READ_QUAT: {
+      float qw, qx, qy, qz;
+      readQuat(qw, qx, qy, qz);
+      Serial.write((uint8_t*)&qw, sizeof(qw));
+      Serial.write((uint8_t*)&qx, sizeof(qx));
+      Serial.write((uint8_t*)&qy, sizeof(qy));
+      Serial.write((uint8_t*)&qz, sizeof(qz));
+      break;
     }
 
-
-    if (dataMsgBufferArray[0] != "")
-    {
-      int pos = dataMsgBufferArray[1].toInt();
-      bool pos_not_found = (pos < 0) || (pos > (3));
-
-      digitalWrite(LED_BUILTIN, HIGH);
-
-      if (dataMsgBufferArray[0] == "/rpy")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readRPY(pos);
-        Serial.println(sendMsg);
-      }
-
-      if (dataMsgBufferArray[0] == "/quat")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readQuat(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/rpy-var")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readRPYVariance(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeRPYVariance(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      if (dataMsgBufferArray[0] == "/acc")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readAcc(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/acc-raw")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readAccRaw(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/acc-off")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readAccOffset(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeAccOffset(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/acc-var")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readAccVariance(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeAccVariance(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/gyro")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readGyro(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/gyro-raw")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readGyroRaw(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/gyro-off")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readGyroOffset(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeGyroOffset(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/gyro-var")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readGyroVariance(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeGyroVariance(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      if (dataMsgBufferArray[0] == "/mag")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readMag(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/mag-raw")
-      {
-        if (pos_not_found)
-          sendMsg = "0.00";
-        else
-          sendMsg = readMagRaw(pos);
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/mag-bvect")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readMagHardOffset(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeMagHardOffset(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/mag-amatR0")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readMagSoftOffset0(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeMagSoftOffset0(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/mag-amatR1")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readMagSoftOffset1(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeMagSoftOffset1(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/mag-amatR2")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          if (pos_not_found)
-            sendMsg = "0.00";
-          else
-            sendMsg = readMagSoftOffset2(pos);
-        }
-        else {
-          if (pos_not_found)
-            sendMsg = "0";
-          else
-            sendMsg = writeMagSoftOffset2(pos, dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/i2c")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          sendMsg = getI2cAddress();
-        }
-        else {
-          sendMsg = setI2cAddress(dataMsgBufferArray[2].toInt());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/gain")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          sendMsg = getFilterGain();
-        }
-        else {
-          sendMsg = setFilterGain(dataMsgBufferArray[2].toFloat());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/frame-id")
-      {
-        if (dataMsgBufferArray[2] == ""){
-          sendMsg = getWorldFrameId();
-        }
-        else {
-          sendMsg = setWorldFrameId(dataMsgBufferArray[2].toInt());
-        }
-        Serial.println(sendMsg);
-      }
-
-      else if (dataMsgBufferArray[0] == "/reset")
-      {
-        sendMsg = triggerResetParams();
-        Serial.println(sendMsg);
-      }
-
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-    else
-    {
-      digitalWrite(LED_BUILTIN, HIGH);
-
-      sendMsg = "0";
-      Serial.println(sendMsg);
-
-      digitalWrite(LED_BUILTIN, LOW);
+    case READ_RPY: {
+      float r, p, y;
+      readRPY(r, p, y);
+      Serial.write((uint8_t*)&r, sizeof(r));
+      Serial.write((uint8_t*)&p, sizeof(p));
+      Serial.write((uint8_t*)&y, sizeof(y));
+      break;
     }
 
-    sendMsg = "";
-    dataMsg = "";
-    dataMsgBuffer = "";
-    dataMsgBufferArray[0] = "";
-    dataMsgBufferArray[1] = "";
-    dataMsgBufferArray[2] = "";
-  } 
+    case READ_RPY_VAR: {
+      float r, p, y;
+      readRPYVariance(r, p, y);
+      Serial.write((uint8_t*)&r, sizeof(r));
+      Serial.write((uint8_t*)&p, sizeof(p));
+      Serial.write((uint8_t*)&y, sizeof(y));
+      break;
+    }
+    case WRITE_RPY_VAR: {
+      float r, p, y;
+      memcpy(&r, &data[0], sizeof(float));
+      memcpy(&p, &data[4], sizeof(float));
+      memcpy(&y, &data[8], sizeof(float));
+      float res = writeRPYVariance(r, p, y);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_ACC: {
+      float ax, ay, az;
+      readAcc(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      break;
+    }
+
+
+    case READ_ACC_RAW: {
+      float ax, ay, az;
+      readAccRaw(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      break;
+    }
+
+
+    case READ_ACC_OFF: {
+      float ax, ay, az;
+      readAccOffset(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      break;
+    }
+    case WRITE_ACC_OFF: {
+      float ax, ay, az;
+      memcpy(&ax, &data[0], sizeof(float));
+      memcpy(&ay, &data[4], sizeof(float));
+      memcpy(&az, &data[8], sizeof(float));
+      float res = writeAccOffset(ax, ay, az);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_ACC_VAR: {
+      float ax, ay, az;
+      readAccVariance(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      break;
+    }
+    case WRITE_ACC_VAR: {
+      float ax, ay, az;
+      memcpy(&ax, &data[0], sizeof(float));
+      memcpy(&ay, &data[4], sizeof(float));
+      memcpy(&az, &data[8], sizeof(float));
+      float res = writeAccVariance(ax, ay, az);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_GYRO: {
+      float gx, gy, gz;
+      readGyro(gx, gy, gz);
+      Serial.write((uint8_t*)&gx, sizeof(gx));
+      Serial.write((uint8_t*)&gy, sizeof(gy));
+      Serial.write((uint8_t*)&gz, sizeof(gz));
+      break;
+    }
+
+
+    case READ_GYRO_RAW: {
+      float gx, gy, gz;
+      readGyroRaw(gx, gy, gz);
+      Serial.write((uint8_t*)&gx, sizeof(gx));
+      Serial.write((uint8_t*)&gy, sizeof(gy));
+      Serial.write((uint8_t*)&gz, sizeof(gz));
+      break;
+    }
+
+
+    case READ_GYRO_OFF: {
+      float gx, gy, gz;
+      readGyroOffset(gx, gy, gz);
+      Serial.write((uint8_t*)&gx, sizeof(gx));
+      Serial.write((uint8_t*)&gy, sizeof(gy));
+      Serial.write((uint8_t*)&gz, sizeof(gz));
+      break;
+    }
+    case WRITE_GYRO_OFF: {
+      float gx, gy, gz;
+      memcpy(&gx, &data[0], sizeof(float));
+      memcpy(&gy, &data[4], sizeof(float));
+      memcpy(&gz, &data[8], sizeof(float));
+      float res = writeGyroOffset(gx, gy, gz);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_GYRO_VAR: {
+      float gx, gy, gz;
+      readGyroVariance(gx, gy, gz);
+      Serial.write((uint8_t*)&gx, sizeof(gx));
+      Serial.write((uint8_t*)&gy, sizeof(gy));
+      Serial.write((uint8_t*)&gz, sizeof(gz));
+      break;
+    }
+    case WRITE_GYRO_VAR: {
+      float gx, gy, gz;
+      memcpy(&gx, &data[0], sizeof(float));
+      memcpy(&gy, &data[4], sizeof(float));
+      memcpy(&gz, &data[8], sizeof(float));
+      float res = writeGyroVariance(gx, gy, gz);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+    
+    case READ_MAG: {
+      float mx, my, mz;
+      readMag(mx, my, mz);
+      Serial.write((uint8_t*)&mx, sizeof(mx));
+      Serial.write((uint8_t*)&my, sizeof(my));
+      Serial.write((uint8_t*)&mz, sizeof(mz));
+      break;
+    }
+
+
+    case READ_MAG_RAW: {
+      float mx, my, mz;
+      readMagRaw(mx, my, mz);
+      Serial.write((uint8_t*)&mx, sizeof(mx));
+      Serial.write((uint8_t*)&my, sizeof(my));
+      Serial.write((uint8_t*)&mz, sizeof(mz));
+      break;
+    }
+
+
+    case READ_MAG_H_OFF: {
+      float mx, my, mz;
+      readMagHardOffset(mx, my, mz);
+      Serial.write((uint8_t*)&mx, sizeof(mx));
+      Serial.write((uint8_t*)&my, sizeof(my));
+      Serial.write((uint8_t*)&mz, sizeof(mz));
+      break;
+    }
+    case WRITE_MAG_H_OFF: {
+      float mx, my, mz;
+      memcpy(&mx, &data[0], sizeof(float));
+      memcpy(&my, &data[4], sizeof(float));
+      memcpy(&mz, &data[8], sizeof(float));
+      float res = writeMagHardOffset(mx, my, mz);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_MAG_S_OFF0: {
+      float mx, my, mz;
+      readMagSoftOffset0(mx, my, mz);
+      Serial.write((uint8_t*)&mx, sizeof(mx));
+      Serial.write((uint8_t*)&my, sizeof(my));
+      Serial.write((uint8_t*)&mz, sizeof(mz));
+      break;
+    }
+    case WRITE_MAG_S_OFF0: {
+      float mx, my, mz;
+      memcpy(&mx, &data[0], sizeof(float));
+      memcpy(&my, &data[4], sizeof(float));
+      memcpy(&mz, &data[8], sizeof(float));
+      float res = writeMagSoftOffset0(mx, my, mz);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_MAG_S_OFF1: {
+      float mx, my, mz;
+      readMagSoftOffset1(mx, my, mz);
+      Serial.write((uint8_t*)&mx, sizeof(mx));
+      Serial.write((uint8_t*)&my, sizeof(my));
+      Serial.write((uint8_t*)&mz, sizeof(mz));
+      break;
+    }
+    case WRITE_MAG_S_OFF1: {
+      float mx, my, mz;
+      memcpy(&mx, &data[0], sizeof(float));
+      memcpy(&my, &data[4], sizeof(float));
+      memcpy(&mz, &data[8], sizeof(float));
+      float res = writeMagSoftOffset1(mx, my, mz);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case READ_MAG_S_OFF2: {
+      float mx, my, mz;
+      readMagSoftOffset2(mx, my, mz);
+      Serial.write((uint8_t*)&mx, sizeof(mx));
+      Serial.write((uint8_t*)&my, sizeof(my));
+      Serial.write((uint8_t*)&mz, sizeof(mz));
+      break;
+    }
+    case WRITE_MAG_S_OFF2: {
+      float mx, my, mz;
+      memcpy(&mx, &data[0], sizeof(float));
+      memcpy(&my, &data[4], sizeof(float));
+      memcpy(&mz, &data[8], sizeof(float));
+      float res = writeMagSoftOffset2(mx, my, mz);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case SET_I2C_ADDR: {
+      float value;
+      memcpy(&value, &data[1], sizeof(float));
+      float res = setI2cAddress((int)value);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+    case GET_I2C_ADDR: {
+      float res = getI2cAddress();
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case SET_FILTER_GAIN: {
+      float value;
+      memcpy(&value, &data[1], sizeof(float));
+      float res = setFilterGain(value);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+    case GET_FILTER_GAIN: {
+      float res = getFilterGain();
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case SET_FRAME_ID: {
+      float value;
+      memcpy(&value, &data[1], sizeof(float));
+      float res = setWorldFrameId((int)value);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+    case GET_FRAME_ID: {
+      float res = getWorldFrameId();
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    case RESET_PARAMS: {
+      float res = triggerResetParams();
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
+    default: {
+      float error = 0.0;
+      Serial.write((uint8_t*)&error, sizeof(error));
+      break;
+    }
+  }
+
+  gpio_set_level((gpio_num_t)LED_BUILTIN, 0);
+}
+
+
+
+
+
+
+
+
+void recieve_and_send_data() {
+  static uint8_t state = 0;
+  static uint8_t cmd, length;
+  static uint8_t buffer[32];
+  static uint8_t index = 0;
+  static uint8_t checksum = 0;
+
+  while (Serial.available()) {
+    uint8_t b = Serial.read();
+
+    switch (state) {
+      case 0: // Wait for start
+        if (b == START_BYTE) {
+          state = 1;
+          checksum = b;
+        }
+        break;
+
+      case 1: // Command
+        cmd = b;
+        checksum += b;
+        state = 2;
+        break;
+
+      case 2: // Length
+        length = b;
+        checksum += b;
+        if (length==0){
+          state = 4;
+        }
+        else{
+          index = 0;
+          state = 3;
+        }
+        break;
+
+      case 3: // Payload
+        buffer[index++] = b;
+        checksum += b;
+        if (index >= length) state = 4;
+        break;
+
+      case 4: // Checksum
+        if ((checksum & 0xFF) == b) {
+          processCommand(cmd, buffer, length);
+        } else {
+          float error = 0.0;
+          Serial.write((uint8_t*)&error, sizeof(error));
+        }
+        state = 0; // reset for next packet
+        break;
+    }
+  }
 }
 
 #endif
