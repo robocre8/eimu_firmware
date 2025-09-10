@@ -15,9 +15,9 @@ unsigned long readImuTime, readImuTimeInterval = 5;        // ms -> (1000/sample
 
 void setup()
 {
-  Serial.begin(115200);
+  // Serial.begin(115200);
   // Serial.begin(460800);
-  // Serial.begin(921600);
+  Serial.begin(921600);
 
   //---------------- INITIALIZE IMU -----------------------//
   // start communication with IMU 
