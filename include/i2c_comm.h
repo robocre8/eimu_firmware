@@ -35,6 +35,28 @@ void prepareResponse4(float res0, float res1, float res2, float res3) {
   memcpy(&sendMsgBuffer[12], &res3, sizeof(float));
 }
 
+void prepareResponse6(float res0, float res1, float res2, float res3, float res4, float res5) {
+  sendMsgLength = 24;
+  memcpy(&sendMsgBuffer[0], &res0, sizeof(float));
+  memcpy(&sendMsgBuffer[4], &res1, sizeof(float));
+  memcpy(&sendMsgBuffer[8], &res2, sizeof(float));
+  memcpy(&sendMsgBuffer[12], &res3, sizeof(float));
+  memcpy(&sendMsgBuffer[16], &res4, sizeof(float));
+  memcpy(&sendMsgBuffer[20], &res5, sizeof(float));
+}
+
+void prepareResponse8(float res0, float res1, float res2, float res3, float res4, float res5, float res6, float res7) {
+  sendMsgLength = 32;
+  memcpy(&sendMsgBuffer[0], &res0, sizeof(float));
+  memcpy(&sendMsgBuffer[4], &res1, sizeof(float));
+  memcpy(&sendMsgBuffer[8], &res2, sizeof(float));
+  memcpy(&sendMsgBuffer[12], &res3, sizeof(float));
+  memcpy(&sendMsgBuffer[16], &res4, sizeof(float));
+  memcpy(&sendMsgBuffer[20], &res5, sizeof(float));
+  memcpy(&sendMsgBuffer[24], &res6, sizeof(float));
+  memcpy(&sendMsgBuffer[28], &res7, sizeof(float));
+}
+
 // Example command handler
 void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 
@@ -103,7 +125,6 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       break;
     }
 
-
     case SET_FRAME_ID: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
@@ -117,10 +138,19 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       break;
     }
 
+    case READ_QUAT_RPY: {
+      float qw, qx, qy, qz, r, p, y, dummy_data = 0.0;
+      readQuat(qw, qx, qy, qz);
+      readRPY(r, p, y);
+      prepareResponse8(qw, qx, qy, qz, r, p, y, dummy_data);
+      break;
+    }
 
-    case RESET_PARAMS: {
-      float res = triggerResetParams();
-      Serial.write((uint8_t*)&res, sizeof(res));
+    case READ_ACC_GYRO: {
+      float ax, ay, az, gx, gy, gz;
+      readAcc(ax, ay, az);
+      readGyro(gx, gy, gz);
+      prepareResponse6(ax, ay, az, gx, gy, gz);
       break;
     }
 

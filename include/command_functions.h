@@ -42,6 +42,8 @@ const uint8_t GET_FILTER_GAIN = 0x1E;
 const uint8_t SET_FRAME_ID = 0x1F;
 const uint8_t GET_FRAME_ID = 0x20;
 const uint8_t RESET_PARAMS = 0x21;
+const uint8_t READ_QUAT_RPY = 0x22;
+const uint8_t READ_ACC_GYRO = 0x23;
 //---------------------------------------------------//
 
 //--------------- global variables -----------------//

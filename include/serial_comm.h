@@ -307,6 +307,36 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
 
 
+    case READ_QUAT_RPY: {
+      float qw, qx, qy, qz, r, p, y, dummy_data=0.0;
+      readQuat(qw, qx, qy, qz);
+      readRPY(r, p, y);
+      Serial.write((uint8_t*)&qw, sizeof(qw));
+      Serial.write((uint8_t*)&qx, sizeof(qx));
+      Serial.write((uint8_t*)&qy, sizeof(qy));
+      Serial.write((uint8_t*)&qz, sizeof(qz));
+      Serial.write((uint8_t*)&r, sizeof(r));
+      Serial.write((uint8_t*)&p, sizeof(p));
+      Serial.write((uint8_t*)&y, sizeof(y));
+      Serial.write((uint8_t*)&dummy_data, sizeof(dummy_data));
+      break;
+    }
+
+
+    case READ_ACC_GYRO: {
+      float ax, ay, az, gx, gy, gz;
+      readAcc(ax, ay, az);
+      readGyro(gx, gy, gz);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.write((uint8_t*)&gx, sizeof(gx));
+      Serial.write((uint8_t*)&gy, sizeof(gy));
+      Serial.write((uint8_t*)&gz, sizeof(gz));
+      break;
+    }
+
+
     default: {
       float error = 0.0;
       Serial.write((uint8_t*)&error, sizeof(error));
