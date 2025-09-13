@@ -4,150 +4,230 @@
 #include <Wire.h>
 #include "command_functions.h"
 
-String i2cDataMsg = "", i2cDataMsgBuffer = "", i2cDataMsgBufferArray[3];
-String i2cSendMsg = "";
+
+const uint8_t MAX_I2C_BUFFER = 32;
+static uint8_t sendMsgBuffer[MAX_I2C_BUFFER];
+static uint8_t sendMsgLength = 0;
+
+void clearSendMsgBuffer(){
+  for (uint8_t i=0; i< MAX_I2C_BUFFER; i+=1){
+    sendMsgBuffer[i] = 0x00;
+  }
+}
+// Pack float response into txBuffer
+void prepareResponse1(float res) {
+  sendMsgLength = 4;
+  memcpy(&sendMsgBuffer[0], &res, sizeof(float));
+}
+
+void prepareResponse3(float res0, float res1, float res2) {
+  sendMsgLength = 12;
+  memcpy(&sendMsgBuffer[0], &res0, sizeof(float));
+  memcpy(&sendMsgBuffer[4], &res1, sizeof(float));
+  memcpy(&sendMsgBuffer[8], &res2, sizeof(float));
+}
+
+void prepareResponse4(float res0, float res1, float res2, float res3) {
+  sendMsgLength = 16;
+  memcpy(&sendMsgBuffer[0], &res0, sizeof(float));
+  memcpy(&sendMsgBuffer[4], &res1, sizeof(float));
+  memcpy(&sendMsgBuffer[8], &res2, sizeof(float));
+  memcpy(&sendMsgBuffer[12], &res3, sizeof(float));
+}
+
+void prepareResponse6(float res0, float res1, float res2, float res3, float res4, float res5) {
+  sendMsgLength = 24;
+  memcpy(&sendMsgBuffer[0], &res0, sizeof(float));
+  memcpy(&sendMsgBuffer[4], &res1, sizeof(float));
+  memcpy(&sendMsgBuffer[8], &res2, sizeof(float));
+  memcpy(&sendMsgBuffer[12], &res3, sizeof(float));
+  memcpy(&sendMsgBuffer[16], &res4, sizeof(float));
+  memcpy(&sendMsgBuffer[20], &res5, sizeof(float));
+}
+
+void prepareResponse8(float res0, float res1, float res2, float res3, float res4, float res5, float res6, float res7) {
+  sendMsgLength = 32;
+  memcpy(&sendMsgBuffer[0], &res0, sizeof(float));
+  memcpy(&sendMsgBuffer[4], &res1, sizeof(float));
+  memcpy(&sendMsgBuffer[8], &res2, sizeof(float));
+  memcpy(&sendMsgBuffer[12], &res3, sizeof(float));
+  memcpy(&sendMsgBuffer[16], &res4, sizeof(float));
+  memcpy(&sendMsgBuffer[20], &res5, sizeof(float));
+  memcpy(&sendMsgBuffer[24], &res6, sizeof(float));
+  memcpy(&sendMsgBuffer[28], &res7, sizeof(float));
+}
+
+// Example command handler
+void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
+
+  gpio_set_level((gpio_num_t)LED_BUILTIN, 1);
+
+  switch (cmd) {
+    case READ_QUAT: {
+      float qw, qx, qy, qz;
+      readQuat(qw, qx, qy, qz);
+      prepareResponse4(qw, qx, qy, qz);
+      break;
+    }
+
+    case READ_RPY: {
+      float r, p, y;
+      readRPY(r, p, y);
+      prepareResponse3(r, p, y);
+      break;
+    }
+
+    case READ_RPY_VAR: {
+      float r, p, y;
+      readRPYVariance(r, p, y);
+      prepareResponse3(r, p, y);
+      break;
+    }
+
+    case READ_ACC: {
+      float ax, ay, az;
+      readAcc(ax, ay, az);
+      prepareResponse3(ax, ay, az);
+      break;
+    }
+
+    case READ_ACC_VAR: {
+      float ax, ay, az;
+      readAccVariance(ax, ay, az);
+      prepareResponse3(ax, ay, az);
+      break;
+    }
+
+    case READ_GYRO: {
+      float gx, gy, gz;
+      readGyro(gx, gy, gz);
+      prepareResponse3(gx, gy, gz);
+      break;
+    }
+
+    case READ_GYRO_VAR: {
+      float gx, gy, gz;
+      readGyroVariance(gx, gy, gz);
+      prepareResponse3(gx, gy, gz);
+      break;
+    }
+    
+    case READ_MAG: {
+      float mx, my, mz;
+      readMag(mx, my, mz);
+      prepareResponse3(mx, my, mz);
+      break;
+    }
+
+    case GET_FILTER_GAIN: {
+      float res = getFilterGain();
+      prepareResponse1(res);
+      break;
+    }
+
+    case SET_FRAME_ID: {
+      float value;
+      memcpy(&value, &data[1], sizeof(float));
+      float res = setWorldFrameId((int)value);
+      prepareResponse1(res);
+      break;
+    }
+    case GET_FRAME_ID: {
+      float res = getWorldFrameId();
+      prepareResponse1(res);
+      break;
+    }
+
+    case READ_QUAT_RPY: {
+      float qw, qx, qy, qz, r, p, y, dummy_data = 0.0;
+      readQuat(qw, qx, qy, qz);
+      readRPY(r, p, y);
+      prepareResponse8(qw, qx, qy, qz, r, p, y, dummy_data);
+      break;
+    }
+
+    case READ_ACC_GYRO: {
+      float ax, ay, az, gx, gy, gz;
+      readAcc(ax, ay, az);
+      readGyro(gx, gy, gz);
+      prepareResponse6(ax, ay, az, gx, gy, gz);
+      break;
+    }
+
+    default: {
+      float error = 0.0;
+      prepareResponse1(error);
+      break;
+    }
+  }
+}
 
 
+
+
+// Called when master requests data
 void onRequest() {
-  Wire.print(i2cSendMsg);
-  i2cSendMsg = "";
+  Wire.write(sendMsgBuffer, sendMsgLength);
+  clearSendMsgBuffer();
+  gpio_set_level((gpio_num_t)LED_BUILTIN, 0);
 }
 
+// Called when master sends data
+void onReceive(int numBytes) {
+  static uint8_t readState = 0;
+  static uint8_t msgCmd, msgLength;
+  static uint8_t msgBuffer[MAX_I2C_BUFFER];
+  static uint8_t msgIndex = 0;
+  static uint8_t msgChecksum = 0;
 
-void onReceive(int dataSizeInBytes) {
-  int indexPos = 0, i = 0;
+  while (Wire.available()) {
+    uint8_t b = Wire.read();
 
-  for (int i = 0; i < dataSizeInBytes; i += 1)
-  {
-    char c = Wire.read();
-    i2cDataMsg += c;
+    switch (readState) {
+      case 0: // Wait for start
+        if (b == START_BYTE) {
+          readState = 1;
+          msgChecksum = b;
+        }
+        break;
+
+      case 1: // Command
+        msgCmd = b;
+        msgChecksum += b;
+        readState = 2;
+        break;
+
+      case 2: // Length
+        msgLength = b;
+        msgChecksum += b;
+        if (msgLength==0){
+          readState = 4;
+        }
+        else{
+          msgIndex = 0;
+          readState = 3;
+        }
+        break;
+
+      case 3: // Payload
+        msgBuffer[msgIndex++] = b;
+        msgChecksum += b;
+        if (msgIndex >= msgLength) readState = 4;
+        break;
+
+      case 4: // Checksum
+        if ((msgChecksum & 0xFF) == b) {
+          handleCommand(msgCmd, msgBuffer, msgLength);
+        } else {
+          float error = 0.0;
+          prepareResponse1(error);
+        }
+        readState = 0; // reset for next packet
+        break;
+    }
   }
 
-  i2cDataMsg.trim();
-
-  if (i2cDataMsg != "")
-  {
-    do
-    {
-      indexPos = i2cDataMsg.indexOf(',');
-      if (indexPos != -1)
-      {
-        i2cDataMsgBuffer = i2cDataMsg.substring(0, indexPos);
-        i2cDataMsg = i2cDataMsg.substring(indexPos + 1, i2cDataMsg.length());
-        i2cDataMsgBufferArray[i] = i2cDataMsgBuffer;
-        i2cDataMsgBuffer = "";
-      }
-      else
-      {
-        if (i2cDataMsg.length() > 0)
-          i2cDataMsgBufferArray[i] = i2cDataMsg;
-      }
-      i += 1;
-    } while (indexPos >= 0);
-  }
-
-  if (i2cDataMsgBufferArray[0] != "")
-  {
-    int pos = i2cDataMsgBufferArray[1].toInt();
-    bool pos_not_found = (pos < 0) || (pos > (3));
-
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    if (i2cDataMsgBufferArray[0] == "/rpy")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readRPY(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/quat")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readQuat(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/rpy-var")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readRPYVariance(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/acc")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readAcc(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/acc-var")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readAccVariance(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/gyro")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readGyro(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/gyro-var")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readGyroVariance(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/mag")
-    {
-      if (pos_not_found)
-        i2cSendMsg = "0.00";
-      else
-        i2cSendMsg = readMag(pos);
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/gain")
-    {
-      i2cSendMsg = getFilterGain();
-    }
-
-    else if (i2cDataMsgBufferArray[0] == "/frame-id")
-    {
-      if (i2cDataMsgBufferArray[2] == ""){
-        i2cSendMsg = getWorldFrameId();
-      }
-      else {
-        i2cSendMsg = setWorldFrameId(i2cDataMsgBufferArray[2].toInt());
-      }
-    }
-
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-  else
-  {
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    i2cSendMsg = "0";
-
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-
-  i2cDataMsg = "";
-  i2cDataMsgBuffer = "";
-  i2cDataMsgBufferArray[0] = "";
-  i2cDataMsgBufferArray[1] = "";
-  i2cDataMsgBufferArray[2] = "";
 }
+
 
 #endif

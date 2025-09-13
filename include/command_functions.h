@@ -7,6 +7,45 @@
 #include "mpu9250_spi.h"
 #include <Wire.h>
 
+//------------ Communication Command IDs --------------//
+const uint8_t START_BYTE = 0xBB;
+const uint8_t READ_QUAT = 0x01;
+const uint8_t READ_RPY = 0x02;
+const uint8_t READ_RPY_VAR = 0x03;
+const uint8_t WRITE_RPY_VAR = 0x04;
+const uint8_t READ_ACC = 0x05;
+const uint8_t READ_ACC_RAW = 0x06;
+const uint8_t READ_ACC_OFF = 0x07;
+const uint8_t WRITE_ACC_OFF = 0x08;
+const uint8_t READ_ACC_VAR = 0x09;
+const uint8_t WRITE_ACC_VAR = 0x0A;
+const uint8_t READ_GYRO = 0x0B;
+const uint8_t READ_GYRO_RAW = 0x0C;
+const uint8_t READ_GYRO_OFF = 0x0D;
+const uint8_t WRITE_GYRO_OFF = 0x0E;
+const uint8_t READ_GYRO_VAR = 0x0F;
+const uint8_t WRITE_GYRO_VAR = 0x10;
+const uint8_t READ_MAG = 0x11;
+const uint8_t READ_MAG_RAW = 0x12;
+const uint8_t READ_MAG_H_OFF = 0x13;
+const uint8_t WRITE_MAG_H_OFF = 0x14;
+const uint8_t READ_MAG_S_OFF0 = 0x15;
+const uint8_t WRITE_MAG_S_OFF0 = 0x16;
+const uint8_t READ_MAG_S_OFF1 = 0x17;
+const uint8_t WRITE_MAG_S_OFF1 = 0x18;
+const uint8_t READ_MAG_S_OFF2 = 0x19;
+const uint8_t WRITE_MAG_S_OFF2 = 0x1A;
+const uint8_t SET_I2C_ADDR = 0x1B;
+const uint8_t GET_I2C_ADDR = 0x1C;
+const uint8_t SET_FILTER_GAIN = 0x1D;
+const uint8_t GET_FILTER_GAIN = 0x1E;
+const uint8_t SET_FRAME_ID = 0x1F;
+const uint8_t GET_FRAME_ID = 0x20;
+const uint8_t RESET_PARAMS = 0x21;
+const uint8_t READ_QUAT_RPY = 0x22;
+const uint8_t READ_ACC_GYRO = 0x23;
+//---------------------------------------------------//
+
 //--------------- global variables -----------------//
 /* Mpu9250 object, SPI bus, CS on pin 5 */
 MPU9250 imu(SPI, 5);
@@ -184,7 +223,7 @@ void loadStoredParams(){
 
 //--------------- global functions ----------------//
 
-String triggerResetParams()
+float triggerResetParams()
 {
   storage.begin(params_ns, false);
   firstLoad = true;
@@ -192,14 +231,14 @@ String triggerResetParams()
   storage.end();
   // reload to reset
   loadStoredParams();
-  return "1";
+  return 1.0;
 }
 
 // #include "i2c_comm.h"
-String setI2cAddress(int address)
+float setI2cAddress(int address)
 {
   if((address <= 0) || (address > 255)){
-    return "0";
+    return 0.0;
   }
   else {
     i2cAddress = (uint8_t)address;
@@ -209,19 +248,19 @@ String setI2cAddress(int address)
 
     Wire.begin(i2cAddress);
 
-    return "1";
+    return 0.0;
   }  
 }
-String getI2cAddress()
+float getI2cAddress()
 {
-  return String(i2cAddress);
+  return (float)i2cAddress;
 }
 
 
-String setWorldFrameId(int id)
+float setWorldFrameId(int id)
 {
   if((id < 0) || (id > 2)){
-    return "0";
+    return 0.0;
   }
   else {
     worldFrameId = id;
@@ -231,16 +270,16 @@ String setWorldFrameId(int id)
 
     madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 
-    return "1";
+    return 1.0;
   }  
 }
-String getWorldFrameId()
+float getWorldFrameId()
 {
-  return String(worldFrameId);
+  return (float)worldFrameId;
 }
 
 
-String setFilterGain(float gain)
+float setFilterGain(float gain)
 {
   filterGain = gain;
   storage.begin(params_ns, false);
@@ -249,308 +288,258 @@ String setFilterGain(float gain)
 
   madgwickFilter.setAlgorithmGain(filterGain);
 
-  return "1"; 
+  return 1.0; 
 }
-String getFilterGain()
+float getFilterGain()
 {
-  return String(filterGain, 3);
+  return (float)filterGain;
 }
 //-----------------------------------------------------------------//
 
 
 
 //------------------------------------------------------------------//
-String readRPY(int no)
+void readQuat(float &qw, float &qx, float &qy, float &qz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(rpy[no], 6);
+  qw = quat[0];
+  qx = quat[1];
+  qy = quat[2];
+  qz = quat[3];
 }
 
 
-String readQuat(int no)
+void readRPY(float &r, float &p, float &y)
 {
-  bool not_allowed = (no < 0) || (no > 3);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(quat[no], 6);
+  r = rpy[0];
+  p = rpy[1];
+  y = rpy[2];
 }
 
 
-String readRPYVariance(int no)
+void readRPYVariance(float &r, float &p, float &y)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(rpyVar[no], 8);
+  r = rpyVar[0];
+  p = rpyVar[1];
+  y = rpyVar[2];
 }
-String writeRPYVariance(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
+float writeRPYVariance(float r, float p, float y) {
+  float rpyVal[3] = {r, p, y};
+  for (int i = 0; i < 3; i += 1)
+  {
+    rpyVar[i] = rpyVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(rpyVar_key[i], rpyVar[i]);
+    storage.end();
+  }
 
-  if (not_allowed) 
-    return "0";
-
-  rpyVar[no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(rpyVar_key[no], rpyVar[no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readAcc(int no)
+void readAcc(float &ax, float &ay, float &az)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(accCal[no], 6);
+  ax = accCal[0];
+  ay = accCal[1];
+  az = accCal[2];
 }
 
 
-String readAccRaw(int no)
+void readAccRaw(float &ax, float &ay, float &az)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(accRaw[no], 6);
+  ax = accRaw[0];
+  ay = accRaw[1];
+  az = accRaw[2];
 }
 
 
-String readAccOffset(int no)
+void readAccOffset(float &ax, float &ay, float &az)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(accOff[no], 8);
+  ax = accOff[0];
+  ay = accOff[1];
+  az = accOff[2];
 }
-String writeAccOffset(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeAccOffset(float ax, float ay, float az) {
+  float accVal[3] = {ax, ay, az};
+  for (int i = 0; i < 3; i += 1)
+  {
+    accOff[i] = accVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(accOff_key[i], accOff[i]);
+    storage.end();
+  }
 
-  accOff[no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(accOff_key[no], accOff[no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readAccVariance(int no)
+void readAccVariance(float &ax, float &ay, float &az)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(accVar[no], 8);
+  ax = accVar[0];
+  ay = accVar[1];
+  az = accVar[2];
 }
-String writeAccVariance(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
+float writeAccVariance(float ax, float ay, float az) {
+  float accVal[3] = {ax, ay, az};
+  for (int i = 0; i < 3; i += 1)
+  {
+    accVar[i] = accVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(accVar_key[i], accVar[i]);
+    storage.end();
+  }
 
-  if (not_allowed) 
-    return "0";
-
-  accVar[no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(accVar_key[no], accVar[no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readGyro(int no)
+void readGyro(float &gx, float &gy, float &gz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(gyroCal[no], 6);
+  gx = gyroCal[0];
+  gy = gyroCal[1];
+  gz = gyroCal[2];
 }
 
 
-String readGyroRaw(int no)
+void readGyroRaw(float &gx, float &gy, float &gz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(gyroRaw[no], 6);
+  gx = gyroRaw[0];
+  gy = gyroRaw[1];
+  gz = gyroRaw[2];
 }
 
 
-String readGyroOffset(int no)
+void readGyroOffset(float &gx, float &gy, float &gz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(gyroOff[no], 8);
+  gx = gyroOff[0];
+  gy = gyroOff[1];
+  gz = gyroOff[2];
 }
-String writeGyroOffset(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeGyroOffset(float gx, float gy, float gz) {
+  float gyroVal[3] = {gx, gy, gz};
+  for (int i = 0; i < 3; i += 1)
+  {
+    gyroOff[i] = gyroVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(gyroOff_key[i], gyroOff[i]);
+    storage.end();
+  }
 
-  gyroOff[no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(gyroOff_key[no], gyroOff[no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readGyroVariance(int no)
+void readGyroVariance(float &gx, float &gy, float &gz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(gyroVar[no], 6);
+  gx = gyroVar[0];
+  gy = gyroVar[1];
+  gz = gyroVar[2];
 }
-String writeGyroVariance(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeGyroVariance(float gx, float gy, float gz) {
+  float gyroVal[3] = {gx, gy, gz};
+  for (int i = 0; i < 3; i += 1)
+  {
+    gyroVar[i] = gyroVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(gyroVar_key[i], gyroVar[i]);
+    storage.end();
+  }
 
-  gyroVar[no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(gyroVar_key[no], gyroVar[no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
-String readMag(int no)
+void readMag(float &mx, float &my, float &mz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(magCal[no], 6);
+  mx = magCal[0];
+  my = magCal[1];
+  mz = magCal[2];
 }
 
 
-String readMagRaw(int no)
+void readMagRaw(float &mx, float &my, float &mz)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(magRaw[no], 6);
+  mx = magRaw[0];
+  my = magRaw[1];
+  mz = magRaw[2];
 }
 
 
-String readMagHardOffset(int no)
+void readMagHardOffset(float &x, float &y, float &z)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(magBvect[no], 8);
+  x = magBvect[0];
+  y = magBvect[1];
+  z = magBvect[2];
 }
-String writeMagHardOffset(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeMagHardOffset(float x, float y, float z) {
+  float magOffsetVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    magBvect[i] = magOffsetVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(magBvect_key[i], magBvect[i]);
+    storage.end();
+  }
 
-  magBvect[no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(magBvect_key[no], magBvect[no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readMagSoftOffset0(int no)
+void readMagSoftOffset0(float &x, float &y, float &z)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(magAmat[0][no], 8);
+  x = magAmat[0][0];
+  y = magAmat[0][1];
+  z = magAmat[0][2];
 }
-String writeMagSoftOffset0(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeMagSoftOffset0(float x, float y, float z) {
+  float magOffsetVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    magAmat[0][i] = magOffsetVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(magAmatR0_key[i], magAmat[0][i]);
+    storage.end();
+  }
 
-  magAmat[0][no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(magAmatR0_key[no], magAmat[0][no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readMagSoftOffset1(int no)
+void readMagSoftOffset1(float &x, float &y, float &z)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(magAmat[1][no], 8);
+  x = magAmat[1][0];
+  y = magAmat[1][1];
+  z = magAmat[1][2];
 }
-String writeMagSoftOffset1(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeMagSoftOffset1(float x, float y, float z) {
+  float magOffsetVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    magAmat[1][i] = magOffsetVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(magAmatR1_key[i], magAmat[1][i]);
+    storage.end();
+  }
 
-  magAmat[1][no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(magAmatR1_key[no], magAmat[1][no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 
 
-String readMagSoftOffset2(int no)
+void readMagSoftOffset2(float &x, float &y, float &z)
 {
-  bool not_allowed = (no < 0) || (no > 2);
-
-  if (not_allowed) 
-    return "0.000";
-
-  return String(magAmat[2][no], 8);
+  x = magAmat[2][0];
+  y = magAmat[2][1];
+  z = magAmat[2][2];
 }
-String writeMagSoftOffset2(int no, float val) {
-  bool not_allowed = (no < 0) || (no > 2);
-  
-  if (not_allowed) 
-    return "0";
+float writeMagSoftOffset2(float x, float y, float z) {
+  float magOffsetVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    magAmat[2][i] = magOffsetVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(magAmatR2_key[i], magAmat[2][i]);
+    storage.end();
+  }
 
-  magAmat[2][no] = val;
-  storage.begin(params_ns, false);
-  storage.putFloat(magAmatR2_key[no], magAmat[2][no]);
-  storage.end();
-  return "1";
+  return 1.0;
 }
 //-------------------------------------------------------------------//
 

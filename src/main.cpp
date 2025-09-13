@@ -15,9 +15,9 @@ unsigned long readImuTime, readImuTimeInterval = 5;        // ms -> (1000/sample
 
 void setup()
 {
-  /* Serial to display data */
-  Serial.begin(115200);
-  Serial.setTimeout(2);
+  // Serial.begin(115200);
+  // Serial.begin(460800);
+  Serial.begin(921600);
 
   //---------------- INITIALIZE IMU -----------------------//
   // start communication with IMU 
@@ -54,11 +54,12 @@ void setup()
 void loop()
 {
   // Serial comm loop
-  if ((millis() - serialCommTime) >= serialCommTimeInterval)
-  {
-    recieve_and_send_data();
-    serialCommTime = millis();
-  }
+  recieve_and_send_data();
+  // if ((millis() - serialCommTime) >= serialCommTimeInterval)
+  // {
+  //   recieve_and_send_data();
+  //   serialCommTime = millis();
+  // }
 
   if ((millis() - readImuTime) >= readImuTimeInterval)
   {
