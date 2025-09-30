@@ -6,7 +6,7 @@
 
 void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 
-  gpio_set_level((gpio_num_t)LED_BUILTIN, 1);
+  gpio_set_level((gpio_num_t)LED_PIN, 1);
   switch (cmd) {
     case READ_QUAT: {
       float qw, qx, qy, qz;
@@ -344,7 +344,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
   }
 
-  gpio_set_level((gpio_num_t)LED_BUILTIN, 0);
+  gpio_set_level((gpio_num_t)LED_PIN, 0);
 }
 
 

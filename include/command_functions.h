@@ -46,9 +46,35 @@ const uint8_t READ_QUAT_RPY = 0x22;
 const uint8_t READ_ACC_GYRO = 0x23;
 //---------------------------------------------------//
 
+int LED_PIN = 10;
+
 //--------------- global variables -----------------//
-/* Mpu9250 object, SPI bus, CS on pin 5 */
-MPU9250 imu(SPI, 5);
+/* Mpu9250 object, SPI bus, CS on pin 7
+
+ESP32-C3 I2C
+SCL: 9
+SDA: 8
+
+ESP32-C3 SPI
+MOSI: 6
+MISO: 5
+SCK: 4
+SS: 7
+
+MPU9250 SPI CONNECTION:
+VCC
+GND
+SCL (SCK)
+SCA (MOSI)
+EDA
+ECL
+AD0 (MISO)
+INT
+NCS (CS)
+FYNSC
+
+*/ 
+MPU9250 imu(SPI, 7);
 int status;
 
 MadgwickFilter madgwickFilter;

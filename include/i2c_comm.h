@@ -60,7 +60,7 @@ void prepareResponse8(float res0, float res1, float res2, float res3, float res4
 // Example command handler
 void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 
-  gpio_set_level((gpio_num_t)LED_BUILTIN, 1);
+  gpio_set_level((gpio_num_t)LED_PIN, 1);
 
   switch (cmd) {
     case READ_QUAT: {
@@ -169,7 +169,7 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 void onRequest() {
   Wire.write(sendMsgBuffer, sendMsgLength);
   clearSendMsgBuffer();
-  gpio_set_level((gpio_num_t)LED_BUILTIN, 0);
+  gpio_set_level((gpio_num_t)LED_PIN, 0);
 }
 
 // Called when master sends data
