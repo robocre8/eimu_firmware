@@ -13,6 +13,7 @@ class MadgwickFilter
 {
 public:
   MadgwickFilter();
+  void init();
 
 private:
   // **** paramaters
