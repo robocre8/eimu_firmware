@@ -337,6 +337,13 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
 
 
+    case CLEAR_DATA_BUFFER: {
+      float res = clearDataBuffer();
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
     default: {
       float error = 0.0;
       Serial.write((uint8_t*)&error, sizeof(error));
