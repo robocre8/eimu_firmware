@@ -38,6 +38,7 @@ const uint8_t READ_YAW_WITH_DRIFT = 0x24;
 const uint8_t READ_YAW_VEL_DRIFT_BIAS = 0x25;
 const uint8_t WRITE_YAW_VEL_DRIFT_BIAS = 0x26;
 const uint8_t CLEAR_DATA_BUFFER = 0x27;
+const uint8_t READ_IMU_DATA = 0x28;
 //---------------------------------------------------//
 
 int LED_PIN = 10;

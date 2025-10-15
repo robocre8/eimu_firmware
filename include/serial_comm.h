@@ -41,7 +41,6 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&p, &data[4], sizeof(float));
       memcpy(&y, &data[8], sizeof(float));
       float res = writeRPYVariance(r, p, y);
-      Serial.write((uint8_t*)&res, sizeof(res));
       break;
     }
 
@@ -80,7 +79,6 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&ay, &data[4], sizeof(float));
       memcpy(&az, &data[8], sizeof(float));
       float res = writeAccOffset(ax, ay, az);
-      Serial.write((uint8_t*)&res, sizeof(res));
       break;
     }
 
@@ -99,7 +97,6 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&ay, &data[4], sizeof(float));
       memcpy(&az, &data[8], sizeof(float));
       float res = writeAccVariance(ax, ay, az);
-      Serial.write((uint8_t*)&res, sizeof(res));
       break;
     }
 
@@ -138,7 +135,6 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&gy, &data[4], sizeof(float));
       memcpy(&gz, &data[8], sizeof(float));
       float res = writeGyroOffset(gx, gy, gz);
-      Serial.write((uint8_t*)&res, sizeof(res));
       break;
     }
 
@@ -157,7 +153,6 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&gy, &data[4], sizeof(float));
       memcpy(&gz, &data[8], sizeof(float));
       float res = writeGyroVariance(gx, gy, gz);
-      Serial.write((uint8_t*)&res, sizeof(res));
       break;
     }
 
@@ -231,6 +226,24 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       float ax, ay, az, gx, gy, gz;
       readAcc(ax, ay, az);
       readGyro(gx, gy, gz);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.write((uint8_t*)&gx, sizeof(gx));
+      Serial.write((uint8_t*)&gy, sizeof(gy));
+      Serial.write((uint8_t*)&gz, sizeof(gz));
+      break;
+    }
+
+
+    case READ_IMU_DATA: {
+      float r, p, y, ax, ay, az, gx, gy, gz;
+      readRPY(r, p, y);
+      readAcc(ax, ay, az);
+      readGyro(gx, gy, gz);
+      Serial.write((uint8_t*)&r, sizeof(r));
+      Serial.write((uint8_t*)&p, sizeof(p));
+      Serial.write((uint8_t*)&y, sizeof(y));
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
