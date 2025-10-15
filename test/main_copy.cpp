@@ -15,9 +15,9 @@ unsigned long readImuTime, readImuTimeInterval = 5;        // ms -> (1000/sample
 
 void setup()
 {
-  // Serial.begin(115200);
+  Serial.begin(115200);
   // Serial.begin(460800);
-  Serial.begin(921600);
+  // Serial.begin(921600);
 
   //---------------- INITIALIZE IMU -----------------------//
   // start communication with IMU 
@@ -41,11 +41,11 @@ void setup()
   madgwickFilter.setAlgorithmGain(filterGain);
   madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_PIN, HIGH);
   delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_PIN, LOW);
 
   serialCommTime = millis();
   readImuTime = millis();
