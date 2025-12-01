@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Preferences.h>
 #include "madgwick_filter.h"
-#include "mpu9250_spi.h"
+#include "mpu6500_spi.h"
 #include <Wire.h>
 
 //------------ Communication Command IDs --------------//
@@ -41,7 +41,7 @@ const uint8_t CLEAR_DATA_BUFFER = 0x27;
 const uint8_t READ_IMU_DATA = 0x28;
 //---------------------------------------------------//
 
-int LED_PIN = 10;
+int LED_PIN = 2;
 
 //--------------- global variables -----------------//
 /* Mpu9250 object, SPI bus, CS on pin 7
@@ -54,7 +54,7 @@ ESP32-C3 SPI
 MOSI: 6
 MISO: 5
 SCK: 4
-SS: 7
+CS: 7
 
 MPU9250 SPI CONNECTION:
 VCC
@@ -69,7 +69,10 @@ NCS (CS)
 FYNSC
 
 */ 
-MPU9250 imu(SPI, 7);
+
+/* Mpu6500 object, SPI bus, CS on pin 7 */
+Mpu6500 imu(&SPI, 7);
+
 int status;
 
 MadgwickFilter madgwickFilter;
