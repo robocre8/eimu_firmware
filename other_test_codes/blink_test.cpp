@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-const int LED_PIN = 8; // Define the GPIO for the LED on SuperMini
+const int LED_PIN = 2; // Define the GPIO for the LED on SuperMini
 
 void setup()
 {

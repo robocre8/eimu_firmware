@@ -15,6 +15,8 @@ unsigned long readImuTime, readImuTimeInterval = 5;        // ms -> (1000/sample
 
 void setup()
 {
+  loadStoredParams();
+
   Serial.begin(115200);
   // Serial.begin(460800);
   // Serial.begin(921600);
@@ -32,8 +34,6 @@ void setup()
   }
   //--------------------------------------------------------//
 
-  loadStoredParams();
-
   Wire.onReceive(onReceive);
   Wire.onRequest(onRequest);
   Wire.begin(i2cAddress);
@@ -42,7 +42,8 @@ void setup()
   madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 
   pinMode(LED_PIN, OUTPUT);
-
+  digitalWrite(LED_PIN, LOW);
+  delay(1000);
   digitalWrite(LED_PIN, HIGH);
   delay(1000);
   digitalWrite(LED_PIN, LOW);

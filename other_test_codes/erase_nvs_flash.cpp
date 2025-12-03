@@ -1,14 +1,16 @@
 #include <nvs_flash.h>
 #include <Arduino.h>
 
+const int LED_PIN = 2;
+
 void setup() {
   nvs_flash_erase(); // erase the NVS partition and...
   nvs_flash_init(); // initialize the NVS partition.
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_PIN, HIGH);
   delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_PIN, LOW);
   while(true);
 }
 

@@ -48,7 +48,7 @@ const uint8_t CLEAR_DATA_BUFFER = 0x27;
 const uint8_t READ_IMU_DATA = 0x28;
 //---------------------------------------------------//
 
-int LED_PIN = 10;
+int LED_PIN = 2;
 
 //--------------- global variables -----------------//
 /* Mpu9250 object, SPI bus, CS on pin 7
@@ -61,7 +61,7 @@ ESP32-C3 SPI
 MOSI: 6
 MISO: 5
 SCK: 4
-SS: 7
+CS: 7
 
 MPU9250 SPI CONNECTION:
 VCC
