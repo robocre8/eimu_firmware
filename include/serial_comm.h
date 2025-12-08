@@ -65,6 +65,26 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
 
 
+    case READ_LIN_ACC: {
+      float ax, ay, az;
+      readLinearAcc(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      break;
+    }
+
+
+    case READ_LIN_ACC_RAW: {
+      float ax, ay, az;
+      readLinearAccRaw(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      break;
+    }
+
+
     case READ_ACC_OFF: {
       float ax, ay, az;
       readAccOffset(ax, ay, az);
@@ -277,6 +297,20 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
 
 
+    case SET_ACC_LPF_CUT_FREQ: {
+      float value;
+      memcpy(&value, &data[1], sizeof(float));
+      float res = setAccFilterCF(value);
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+    case GET_ACC_LPF_CUT_FREQ: {
+      float res = getAccFilterCF();
+      Serial.write((uint8_t*)&res, sizeof(res));
+      break;
+    }
+
+
     case SET_FRAME_ID: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
@@ -300,7 +334,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 
     case READ_ACC_GYRO: {
       float ax, ay, az, gx, gy, gz;
-      readAcc(ax, ay, az);
+      readLinearAcc(ax, ay, az);
       readGyro(gx, gy, gz);
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
@@ -315,7 +349,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case READ_IMU_DATA: {
       float r, p, y, ax, ay, az, gx, gy, gz;
       readRPY(r, p, y);
-      readAcc(ax, ay, az);
+      readLinearAcc(ax, ay, az);
       readGyro(gx, gy, gz);
       Serial.write((uint8_t*)&r, sizeof(r));
       Serial.write((uint8_t*)&p, sizeof(p));
