@@ -79,6 +79,13 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       break;
     }
 
+    case READ_LIN_ACC: {
+      float ax, ay, az;
+      readLinearAcc(ax, ay, az);
+      prepareResponse3(ax, ay, az);
+      break;
+    }
+
     case READ_ACC_VAR: {
       float ax, ay, az;
       readAccVariance(ax, ay, az);
@@ -128,7 +135,7 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 
     case READ_ACC_GYRO: {
       float ax, ay, az, gx, gy, gz;
-      readAcc(ax, ay, az);
+      readLinearAcc(ax, ay, az);
       readGyro(gx, gy, gz);
       prepareResponse6(ax, ay, az, gx, gy, gz);
       break;

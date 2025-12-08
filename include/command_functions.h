@@ -6,6 +6,7 @@
 #include "madgwick_filter.h"
 #include "mpu9250_spi.h"
 #include <Wire.h>
+#include <adaptive_low_pass_filter.h>
 
 //------------ Communication Command IDs --------------//
 const uint8_t START_BYTE = 0xBB;
@@ -46,6 +47,10 @@ const uint8_t RESET_PARAMS = 0x21;
 const uint8_t READ_ACC_GYRO = 0x23;
 const uint8_t CLEAR_DATA_BUFFER = 0x27;
 const uint8_t READ_IMU_DATA = 0x28;
+const uint8_t SET_ACC_LPF_CUT_FREQ = 0x29;
+const uint8_t GET_ACC_LPF_CUT_FREQ = 0x2A;
+const uint8_t READ_LIN_ACC_RAW = 0x2B;
+const uint8_t READ_LIN_ACC = 0x2C;
 //---------------------------------------------------//
 
 int LED_PIN = 2;
@@ -81,7 +86,7 @@ int status;
 
 MadgwickFilter madgwickFilter;
 
-float filterGain = 1.0;
+float filterGain = 0.1;
 int worldFrameId = 1; // 0 - NWU,  1 - ENU,  2 - NED
 
 // initial i2cAddress
@@ -91,11 +96,24 @@ uint8_t i2cAddress = 0x68;
 bool firstLoad = false;
 //-------------------------------------------------//Serial.print("GYR: ");
 
+// adaptive lowpass Filter
+const int filterOrder = 1;
+double cutOffFreq = 1.0;
+
+AdaptiveLowPassFilter accLPF[3] = {
+  AdaptiveLowPassFilter(filterOrder, cutOffFreq), // motor 0 velocity filter
+  AdaptiveLowPassFilter(filterOrder, cutOffFreq), // motor 1 velocity filter
+  AdaptiveLowPassFilter(filterOrder, cutOffFreq), // motor 1 velocity filter
+};
+
 //-------------- IMU MPU6050 ---------------------//
 float accOff[3];
 float accVar[3];
 float accRaw[3];
 float accCal[3];
+
+float linearAccRaw[3];
+float linearAcc[3];
 
 float gyroOff[3];
 float gyroVar[3];
@@ -173,6 +191,8 @@ const char * magAmatR2_key[3] = {
   "magAmatR22",
 };
 
+const char * cutOffFreq_key = "cutOffFreq";
+
 const char * worldFrameId_key = "worldFrameId";
 
 const char * filterGain_key = "filterGain";
@@ -197,7 +217,8 @@ void resetParamsInStorage(){
     storage.putFloat(magAmatR1_key[i], 0.0);
     storage.putFloat(magAmatR2_key[i], 0.0);
   }
-  storage.putFloat(filterGain_key, 1.0);
+  storage.putFloat(filterGain_key, 0.1);
+  storage.putFloat(cutOffFreq_key, 1.0);
   storage.putInt(worldFrameId_key, 1);
   storage.putUChar(i2cAddress_key, 0x68);
 
@@ -236,7 +257,8 @@ void loadStoredParams(){
     magAmat[1][i] = storage.getFloat(magAmatR1_key[i], 0.0);
     magAmat[2][i] = storage.getFloat(magAmatR2_key[i], 0.0);
   }
-  filterGain = storage.getFloat(filterGain_key, 1.0);
+  filterGain = storage.getFloat(filterGain_key, 0.1);
+  cutOffFreq = storage.getFloat(cutOffFreq_key, 1.0);
   worldFrameId = storage.getInt(worldFrameId_key, 1);
   i2cAddress = storage.getUChar(i2cAddress_key, 0x68);
 
@@ -277,13 +299,17 @@ float clearDataBuffer()
   rpy[2] = 0.0;
 
   quat[0] = 0.0;
-  quat[0] = 0.0;
-  quat[0] = 0.0;
-  quat[0] = 0.0;
+  quat[1] = 0.0;
+  quat[2] = 0.0;
+  quat[3] = 0.0;
 
   madgwickFilter.init();
   madgwickFilter.setAlgorithmGain(filterGain);
   madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU, 1 - ENU, 2 - NED (I'm using NWU reference frame)
+
+  for (int i=0; i<3; i+=1) {
+    accLPF[i].clear();
+  }
   
   return 1.0;
 }
@@ -348,6 +374,25 @@ float getFilterGain()
 {
   return (float)filterGain;
 }
+
+
+float setAccFilterCF(float cf)
+{
+  cutOffFreq = cf;
+  storage.begin(params_ns, false);
+  storage.putFloat(cutOffFreq_key, cutOffFreq);
+  storage.end();
+
+  for (int i=0; i<3; i+=1) {
+    accLPF[i].setCutOffFreq(cutOffFreq);
+  }
+
+  return 1.0; 
+}
+float getAccFilterCF()
+{
+  return (float)cutOffFreq;
+}
 //-----------------------------------------------------------------//
 
 
@@ -397,6 +442,19 @@ void readAcc(float &ax, float &ay, float &az)
   az = accCal[2];
 }
 
+void readLinearAccRaw(float &ax, float &ay, float &az)
+{
+  ax = linearAccRaw[0];
+  ay = linearAccRaw[1];
+  az = linearAccRaw[2];
+}
+
+void readLinearAcc(float &ax, float &ay, float &az)
+{
+  ax = linearAcc[0];
+  ay = linearAcc[1];
+  az = linearAcc[2];
+}
 
 void readAccRaw(float &ax, float &ay, float &az)
 {

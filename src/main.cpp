@@ -10,6 +10,14 @@ float MicroTeslaToTesla(float mT)
   return mT * 1000000;
 }
 
+void accLPFInit()
+{
+  for (int i = 0; i < 3; i += 1)
+  {
+    accLPF[i].setCutOffFreq(cutOffFreq);
+  }
+}
+
 unsigned long serialCommTime, serialCommTimeInterval = 5; // ms -> (1000/sampleTime) hz
 unsigned long readImuTime, readImuTimeInterval = 5;        // ms -> (1000/sampleTime) hz
 
@@ -41,6 +49,8 @@ void setup()
   madgwickFilter.setAlgorithmGain(filterGain);
   madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 
+  accLPFInit();
+
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
   delay(1000);
@@ -71,6 +81,7 @@ void loop()
     float _mx, _my, _mz;
     float r, p, y;
     float qw, qx, qy, qz;
+    float g=9.8, gx, gy, gz;
 
     //------------READ SENSOR DATA IN ENU FRAME---------------//
     accRaw[0] = imu.getAccelY_mss();
@@ -127,6 +138,7 @@ void loop()
       magCal[0] = _my;
       magCal[1] = -1.00 * _mx;
       magCal[2] = _mz;
+
       break;
 
     case 1: // ENU
@@ -141,6 +153,7 @@ void loop()
       magCal[0] = _mx;
       magCal[1] = _my;
       magCal[2] = _mz;
+
       break;
 
     case 2: // NED
@@ -155,6 +168,7 @@ void loop()
       magCal[0] = _my;
       magCal[1] = _mx;
       magCal[2] = -1.00 * _mz;
+
       break;
     }
 
@@ -169,6 +183,28 @@ void loop()
 
     rpy[0] = r; rpy[1] = p; rpy[2] = y;
     quat[0] = qw; quat[1] = qx; quat[2] = qy; quat[3] = qz;
+    //----------------------------------------------------//
+
+    //---- accelerometer precessing - remove gravity -----//
+    if (worldFrameId == 0 || worldFrameId == 1){ // NWU (0) or ENU (1)
+      gx = g * (2*qx*qz - 2*qy*qw);
+      gy = g * (2*qy*qz + 2*qx*qw);
+      gz = g * (1 - 2*qx*qx - 2*qy*qy);
+    } else { //NED (2)
+      gx = g * (2*qx*qz + 2*qy*qw);
+      gy = g * (2*qy*qz - 2*qx*qw);
+      gz = g * (1 - 2*qx*qx - 2*qy*qy);
+    }
+    
+    linearAccRaw[0] = accCal[0] - gx;
+    linearAccRaw[1] = accCal[1] - gy;
+    linearAccRaw[2] = accCal[2] - gz;
+    //----------------------------------------------------//
+
+    //--------- accelerometer precessing - filter --------//
+    linearAcc[0] = accLPF[0].filter(linearAccRaw[0]);
+    linearAcc[1] = accLPF[1].filter(linearAccRaw[1]);
+    linearAcc[2] = accLPF[2].filter(linearAccRaw[2]);
     //----------------------------------------------------//
 
     readImuTime = millis();
