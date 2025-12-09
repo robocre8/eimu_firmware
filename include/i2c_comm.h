@@ -106,14 +106,14 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       prepareResponse3(gx, gy, gz);
       break;
     }
-    
-    case READ_MAG: {
-      float mx, my, mz;
-      readMag(mx, my, mz);
-      prepareResponse3(mx, my, mz);
+
+    case SET_FILTER_GAIN: {
+      float value;
+      memcpy(&value, &data[1], sizeof(float));
+      float res = setFilterGain(value);
+      prepareResponse1(res);
       break;
     }
-
     case GET_FILTER_GAIN: {
       float res = getFilterGain();
       prepareResponse1(res);

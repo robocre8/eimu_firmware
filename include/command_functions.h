@@ -3,12 +3,12 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
-#include "madgwick_filter.h"
+#include "madgwick_filter_6axis_imu.h"
 #include "mpu9250_spi.h"
 #include <Wire.h>
 #include <adaptive_low_pass_filter.h>
 
-//------------ Communication Command IDs --------------//
+//-------- Communication Command IDs --------//
 const uint8_t START_BYTE = 0xBB;
 const uint8_t READ_QUAT = 0x01;
 const uint8_t READ_RPY = 0x02;
@@ -26,16 +26,20 @@ const uint8_t READ_GYRO_OFF = 0x0D;
 const uint8_t WRITE_GYRO_OFF = 0x0E;
 const uint8_t READ_GYRO_VAR = 0x0F;
 const uint8_t WRITE_GYRO_VAR = 0x10;
-const uint8_t READ_MAG = 0x11;
-const uint8_t READ_MAG_RAW = 0x12;
-const uint8_t READ_MAG_H_OFF = 0x13;
-const uint8_t WRITE_MAG_H_OFF = 0x14;
-const uint8_t READ_MAG_S_OFF0 = 0x15;
-const uint8_t WRITE_MAG_S_OFF0 = 0x16;
-const uint8_t READ_MAG_S_OFF1 = 0x17;
-const uint8_t WRITE_MAG_S_OFF1 = 0x18;
-const uint8_t READ_MAG_S_OFF2 = 0x19;
-const uint8_t WRITE_MAG_S_OFF2 = 0x1A;
+
+/*------ specific to only 9-axis imu ------*/
+// const uint8_t READ_MAG = 0x11;
+// const uint8_t READ_MAG_RAW = 0x12;
+// const uint8_t READ_MAG_H_OFF = 0x13;
+// const uint8_t WRITE_MAG_H_OFF = 0x14;
+// const uint8_t READ_MAG_S_OFF0 = 0x15;
+// const uint8_t WRITE_MAG_S_OFF0 = 0x16;
+// const uint8_t READ_MAG_S_OFF1 = 0x17;
+// const uint8_t WRITE_MAG_S_OFF1 = 0x18;
+// const uint8_t READ_MAG_S_OFF2 = 0x19;
+// const uint8_t WRITE_MAG_S_OFF2 = 0x1A;
+/*-----------------------------------------*/
+
 const uint8_t SET_I2C_ADDR = 0x1B;
 const uint8_t GET_I2C_ADDR = 0x1C;
 const uint8_t SET_FILTER_GAIN = 0x1D;
@@ -45,17 +49,24 @@ const uint8_t GET_FRAME_ID = 0x20;
 const uint8_t RESET_PARAMS = 0x21;
 // const uint8_t READ_QUAT_RPY = 0x22;
 const uint8_t READ_ACC_GYRO = 0x23;
+
+/*------ specific to only 6-axis imu ------*/
+const uint8_t READ_YAW_WITH_DRIFT = 0x24;
+const uint8_t READ_YAW_VEL_DRIFT_BIAS = 0x25;
+const uint8_t WRITE_YAW_VEL_DRIFT_BIAS = 0x26;
+/*-----------------------------------------*/
+
 const uint8_t CLEAR_DATA_BUFFER = 0x27;
 const uint8_t READ_IMU_DATA = 0x28;
 const uint8_t SET_ACC_LPF_CUT_FREQ = 0x29;
 const uint8_t GET_ACC_LPF_CUT_FREQ = 0x2A;
 const uint8_t READ_LIN_ACC_RAW = 0x2B;
 const uint8_t READ_LIN_ACC = 0x2C;
-//---------------------------------------------------//
+//--------------------------------------------//
 
 int LED_PIN = 2;
 
-//--------------- global variables -----------------//
+//--------------- global variables -------------//
 /* Mpu9250 object, SPI bus, CS on pin 7
 
 ESP32-C3 I2C
@@ -120,16 +131,24 @@ float gyroVar[3];
 float gyroRaw[3];
 float gyroCal[3];
 
-float magRaw[3];
-float magCal[3];
-float magAmat[3][3];
-float magBvect[3];
-float mag_vect[3];
+/*------ specific to only 6-axis imu ------*/
+float yawVelDriftBias = 0.0;
+float yawAngleDriftBias = 0.0;
+float randomGainMultiplier = 1.0;
+float yawWithDrift = 0.0;
+/*-----------------------------------------*/
+
+/*------ specific to only 6-axis imu ------*/
+// float magRaw[3];
+// float magCal[3];
+// float magAmat[3][3];
+// float magBvect[3];
+// float mag_vect[3];
+/*-----------------------------------------*/
 
 float rpy[3];
 float rpyVar[3];
 float quat[4];
-
 //------------------------------------------------//
 
 
@@ -167,29 +186,7 @@ const char * gyroVar_key[3] = {
   "gyroVar2",
 };
 
-const char * magBvect_key[3] = {
-  "magBvect0",
-  "magBvect1",
-  "magBvect2",
-};
-
-const char * magAmatR0_key[3] = {
-  "magAmatR00",
-  "magAmatR01",
-  "magAmatR02",
-};
-
-const char * magAmatR1_key[3] = {
-  "magAmatR10",
-  "magAmatR11",
-  "magAmatR12",
-};
-
-const char * magAmatR2_key[3] = {
-  "magAmatR20",
-  "magAmatR21",
-  "magAmatR22",
-};
+const char * yawVelDriftBias_key= "yawVelDriftBias";
 
 const char * cutOffFreq_key = "cutOffFreq";
 
@@ -212,11 +209,8 @@ void resetParamsInStorage(){
     storage.putFloat(gyroOff_key[i], 0.0);
     storage.putFloat(gyroVar_key[i], 0.0);
     storage.putFloat(rpyVar_key[i], 0.0);
-    storage.putFloat(magBvect_key[i], 0.0);
-    storage.putFloat(magAmatR0_key[i], 0.0);
-    storage.putFloat(magAmatR1_key[i], 0.0);
-    storage.putFloat(magAmatR2_key[i], 0.0);
   }
+  storage.putFloat(yawVelDriftBias_key, 0.0);
   storage.putFloat(filterGain_key, 0.1);
   storage.putFloat(cutOffFreq_key, 1.0);
   storage.putInt(worldFrameId_key, 1);
@@ -252,11 +246,8 @@ void loadStoredParams(){
     gyroOff[i] = storage.getFloat(gyroOff_key[i], 0.0);
     gyroVar[i] = storage.getFloat(gyroVar_key[i], 0.0);
     rpyVar[i] = storage.getFloat(rpyVar_key[i], 0.0);
-    magBvect[i] = storage.getFloat(magBvect_key[i], 0.0);
-    magAmat[0][i] = storage.getFloat(magAmatR0_key[i], 0.0);
-    magAmat[1][i] = storage.getFloat(magAmatR1_key[i], 0.0);
-    magAmat[2][i] = storage.getFloat(magAmatR2_key[i], 0.0);
   }
+  yawVelDriftBias = storage.getFloat(yawVelDriftBias_key, 0.0);
   filterGain = storage.getFloat(filterGain_key, 0.1);
   cutOffFreq = storage.getFloat(cutOffFreq_key, 1.0);
   worldFrameId = storage.getInt(worldFrameId_key, 1);
@@ -302,6 +293,9 @@ float clearDataBuffer()
   quat[1] = 0.0;
   quat[2] = 0.0;
   quat[3] = 0.0;
+
+  yawAngleDriftBias = 0.0;
+  randomGainMultiplier = 1.0;
 
   madgwickFilter.init();
   madgwickFilter.setAlgorithmGain(filterGain);
@@ -559,100 +553,27 @@ float writeGyroVariance(float gx, float gy, float gz) {
   return 1.0;
 }
 
-void readMag(float &mx, float &my, float &mz)
+
+float readYawWithDrift()
 {
-  mx = magCal[0];
-  my = magCal[1];
-  mz = magCal[2];
+  return (float)yawWithDrift;
 }
 
 
-void readMagRaw(float &mx, float &my, float &mz)
+float readYawVelDriftBias()
 {
-  mx = magRaw[0];
-  my = magRaw[1];
-  mz = magRaw[2];
+  return (float)yawVelDriftBias;
 }
+float writeYawVelDriftBias(float val) {
 
-
-void readMagHardOffset(float &x, float &y, float &z)
-{
-  x = magBvect[0];
-  y = magBvect[1];
-  z = magBvect[2];
-}
-float writeMagHardOffset(float x, float y, float z) {
-  float magOffsetVal[3] = {x, y, z};
-  for (int i = 0; i < 3; i += 1)
-  {
-    magBvect[i] = magOffsetVal[i];
-    storage.begin(params_ns, false);
-    storage.putFloat(magBvect_key[i], magBvect[i]);
-    storage.end();
-  }
+  yawVelDriftBias = val;
+  storage.begin(params_ns, false);
+  storage.putFloat(yawVelDriftBias_key, yawVelDriftBias);
+  storage.end();
 
   return 1.0;
 }
 
-
-void readMagSoftOffset0(float &x, float &y, float &z)
-{
-  x = magAmat[0][0];
-  y = magAmat[0][1];
-  z = magAmat[0][2];
-}
-float writeMagSoftOffset0(float x, float y, float z) {
-  float magOffsetVal[3] = {x, y, z};
-  for (int i = 0; i < 3; i += 1)
-  {
-    magAmat[0][i] = magOffsetVal[i];
-    storage.begin(params_ns, false);
-    storage.putFloat(magAmatR0_key[i], magAmat[0][i]);
-    storage.end();
-  }
-
-  return 1.0;
-}
-
-
-void readMagSoftOffset1(float &x, float &y, float &z)
-{
-  x = magAmat[1][0];
-  y = magAmat[1][1];
-  z = magAmat[1][2];
-}
-float writeMagSoftOffset1(float x, float y, float z) {
-  float magOffsetVal[3] = {x, y, z};
-  for (int i = 0; i < 3; i += 1)
-  {
-    magAmat[1][i] = magOffsetVal[i];
-    storage.begin(params_ns, false);
-    storage.putFloat(magAmatR1_key[i], magAmat[1][i]);
-    storage.end();
-  }
-
-  return 1.0;
-}
-
-
-void readMagSoftOffset2(float &x, float &y, float &z)
-{
-  x = magAmat[2][0];
-  y = magAmat[2][1];
-  z = magAmat[2][2];
-}
-float writeMagSoftOffset2(float x, float y, float z) {
-  float magOffsetVal[3] = {x, y, z};
-  for (int i = 0; i < 3; i += 1)
-  {
-    magAmat[2][i] = magOffsetVal[i];
-    storage.begin(params_ns, false);
-    storage.putFloat(magAmatR2_key[i], magAmat[2][i]);
-    storage.end();
-  }
-
-  return 1.0;
-}
 //-------------------------------------------------------------------//
 
 

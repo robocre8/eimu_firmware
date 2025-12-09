@@ -177,94 +177,23 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
 
     
-    case READ_MAG: {
-      float mx, my, mz;
-      readMag(mx, my, mz);
-      Serial.write((uint8_t*)&mx, sizeof(mx));
-      Serial.write((uint8_t*)&my, sizeof(my));
-      Serial.write((uint8_t*)&mz, sizeof(mz));
+    case READ_YAW_WITH_DRIFT: {
+      float val = readYawWithDrift();
+      Serial.write((uint8_t*)&val, sizeof(val));
       break;
     }
 
 
-    case READ_MAG_RAW: {
-      float mx, my, mz;
-      readMagRaw(mx, my, mz);
-      Serial.write((uint8_t*)&mx, sizeof(mx));
-      Serial.write((uint8_t*)&my, sizeof(my));
-      Serial.write((uint8_t*)&mz, sizeof(mz));
+    case READ_YAW_VEL_DRIFT_BIAS: {
+      float val = readYawVelDriftBias();
+      Serial.write((uint8_t*)&val, sizeof(val));
       break;
     }
-
-
-    case READ_MAG_H_OFF: {
-      float mx, my, mz;
-      readMagHardOffset(mx, my, mz);
-      Serial.write((uint8_t*)&mx, sizeof(mx));
-      Serial.write((uint8_t*)&my, sizeof(my));
-      Serial.write((uint8_t*)&mz, sizeof(mz));
-      break;
-    }
-    case WRITE_MAG_H_OFF: {
-      float mx, my, mz;
-      memcpy(&mx, &data[0], sizeof(float));
-      memcpy(&my, &data[4], sizeof(float));
-      memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagHardOffset(mx, my, mz);
-      break;
-    }
-
-
-    case READ_MAG_S_OFF0: {
-      float mx, my, mz;
-      readMagSoftOffset0(mx, my, mz);
-      Serial.write((uint8_t*)&mx, sizeof(mx));
-      Serial.write((uint8_t*)&my, sizeof(my));
-      Serial.write((uint8_t*)&mz, sizeof(mz));
-      break;
-    }
-    case WRITE_MAG_S_OFF0: {
-      float mx, my, mz;
-      memcpy(&mx, &data[0], sizeof(float));
-      memcpy(&my, &data[4], sizeof(float));
-      memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagSoftOffset0(mx, my, mz);
-      break;
-    }
-
-
-    case READ_MAG_S_OFF1: {
-      float mx, my, mz;
-      readMagSoftOffset1(mx, my, mz);
-      Serial.write((uint8_t*)&mx, sizeof(mx));
-      Serial.write((uint8_t*)&my, sizeof(my));
-      Serial.write((uint8_t*)&mz, sizeof(mz));
-      break;
-    }
-    case WRITE_MAG_S_OFF1: {
-      float mx, my, mz;
-      memcpy(&mx, &data[0], sizeof(float));
-      memcpy(&my, &data[4], sizeof(float));
-      memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagSoftOffset1(mx, my, mz);
-      break;
-    }
-
-
-    case READ_MAG_S_OFF2: {
-      float mx, my, mz;
-      readMagSoftOffset2(mx, my, mz);
-      Serial.write((uint8_t*)&mx, sizeof(mx));
-      Serial.write((uint8_t*)&my, sizeof(my));
-      Serial.write((uint8_t*)&mz, sizeof(mz));
-      break;
-    }
-    case WRITE_MAG_S_OFF2: {
-      float mx, my, mz;
-      memcpy(&mx, &data[0], sizeof(float));
-      memcpy(&my, &data[4], sizeof(float));
-      memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagSoftOffset2(mx, my, mz);
+    case WRITE_YAW_VEL_DRIFT_BIAS: {
+      float val;
+      memcpy(&val, &data[1], sizeof(float));
+      float res = writeYawVelDriftBias(val);
+      Serial.write((uint8_t*)&res, sizeof(res));
       break;
     }
 

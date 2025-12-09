@@ -10,6 +10,30 @@ float MicroTeslaToTesla(float mT)
   return mT * 1000000;
 }
 
+void rpyToQuat(float (&quat_result)[4], float (&rpy_input)[3]){
+  // Ensure angles are in radians for trigonometric functions
+  float halfRoll = rpy_input[0] / 2.0;
+  float halfPitch = rpy_input[1] / 2.0;
+  float halfYaw = rpy_input[2] / 2.0;
+
+  float cosRoll = cos(halfRoll);
+  float sinRoll = sin(halfRoll);
+  float cosPitch = cos(halfPitch);
+  float sinPitch = sin(halfPitch);
+  float cosYaw = cos(halfYaw);
+  float sinYaw = sin(halfYaw);
+
+  float qw = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
+  float qx = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw;
+  float qy = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw;
+  float qz = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
+
+  quat_result[0] = qw;
+  quat_result[1] = qx;
+  quat_result[2] = qy;
+  quat_result[3] = qz;
+}
+
 void accLPFInit()
 {
   for (int i = 0; i < 3; i += 1)
@@ -78,7 +102,6 @@ void loop()
 
     float _ax, _ay, _az;
     float _gx, _gy, _gz;
-    float _mx, _my, _mz;
     float r, p, y;
     float qw, qx, qy, qz;
     float g=9.8, gx, gy, gz;
@@ -91,10 +114,6 @@ void loop()
     gyroRaw[0] = imu.getGyroY_rads();
     gyroRaw[1] = imu.getGyroX_rads();
     gyroRaw[2] = -1.00 * imu.getGyroZ_rads();
-
-    magRaw[0] = imu.getMagY_uT();
-    magRaw[1] = imu.getMagX_uT();
-    magRaw[2] = -1.00 * imu.getMagZ_uT();
     //--------------------------------------------------------//
 
     //---------------CALIBRATE SENSOR DATA IN ENU FRAME -----------------//
@@ -107,18 +126,6 @@ void loop()
     _gx = gyroRaw[0] - gyroOff[0];
     _gy = gyroRaw[1] - gyroOff[1];
     _gz = gyroRaw[2] - gyroOff[2];
-
-    // mag_vect = magRaw - b_vect
-    mag_vect[0] = magRaw[0] - magBvect[0];
-    mag_vect[1] = magRaw[1] - magBvect[1];
-    mag_vect[2] = magRaw[2] - magBvect[2];
-
-    // magCal = A_mat * mag_vect
-    vectOp.transform(mag_vect, magAmat, mag_vect);
-
-    _mx = mag_vect[0];
-    _my = mag_vect[1];
-    _mz = mag_vect[2];
     //-----------------------------------------------------//
 
     //------------- APPLY MADWICK FILTER -----------------//
@@ -135,10 +142,6 @@ void loop()
       gyroCal[1] = -1.00 * _gx;
       gyroCal[2] = _gz;
 
-      magCal[0] = _my;
-      magCal[1] = -1.00 * _mx;
-      magCal[2] = _mz;
-
       break;
 
     case 1: // ENU
@@ -149,10 +152,6 @@ void loop()
       gyroCal[0] = _gx;
       gyroCal[1] = _gy;
       gyroCal[2] = _gz;
-
-      magCal[0] = _mx;
-      magCal[1] = _my;
-      magCal[2] = _mz;
 
       break;
 
@@ -165,24 +164,34 @@ void loop()
       gyroCal[1] = _gx;
       gyroCal[2] = -1.00 * _gz;
 
-      magCal[0] = _my;
-      magCal[1] = _mx;
-      magCal[2] = -1.00 * _mz;
-
       break;
     }
 
-    madgwickFilter.madgwickAHRSupdate(
+     madgwickFilter.madgwickAHRSupdateIMU(
         gyroCal[0], gyroCal[1], gyroCal[2], 
-        accCal[0], accCal[1], accCal[2],
-        MicroTeslaToTesla(magCal[0]), MicroTeslaToTesla(magCal[1]), MicroTeslaToTesla(magCal[2])
+        accCal[0], accCal[1], accCal[2]
     );
 
     madgwickFilter.getOrientationRPY(r, p, y);
-    madgwickFilter.getOrientationQuat(qw, qx, qy, qz);
+    // madgwickFilter.getOrientationQuat(qw, qx, qy, qz);
 
-    rpy[0] = r; rpy[1] = p; rpy[2] = y;
-    quat[0] = qw; quat[1] = qx; quat[2] = qy; quat[3] = qz;
+    // randomSeed(millis());
+    // int randGain = random(9, 11);
+    // if (randGain < 10) randGain = -10;
+    // randomGainMultiplier = (float)randGain/10.0;
+    // randomGainMultiplier = 1.0;
+
+    if ((int)(yawVelDriftBias*100000.0) > 0) {
+      yawAngleDriftBias += ((yawVelDriftBias*(float)readImuTimeInterval*randomGainMultiplier)/1000.0);
+      rpy[0] = r; rpy[1] = p; rpy[2] = y - yawAngleDriftBias;
+      yawWithDrift = y;
+    } else {
+      rpy[0] = r; rpy[1] = p; rpy[2] = y;
+      yawWithDrift = y;
+    }
+
+    rpyToQuat(quat, rpy);
+    qw = quat[0]; qx = quat[1]; qy = quat[2]; qz = quat[3];
     //----------------------------------------------------//
 
     //---- accelerometer precessing - remove gravity -----//
