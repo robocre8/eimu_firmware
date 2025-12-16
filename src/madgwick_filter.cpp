@@ -222,3 +222,23 @@ void MadgwickFilter::madgwickAHRSupdate(float gx, float gy, float gz, float ax,
 
   last_time_ = micros();
 }
+
+void MadgwickFilter::getGravity(float& gx, float& gy, float& gz, float gravity)
+{
+    // Estimate gravity vector from current orientation
+    switch (world_frame_id)
+    {
+        case 2: //2 - NED
+            // Gravity: [0, 0, -1]
+            rotateAndScaleVector(q0, q1, q2, q3, 0.0, 0.0, -2.0 * gravity, gx,
+                                 gy, gz);
+            break;
+        case 0: //0 - NWU
+        case 1: // 1 - ENU
+        default:
+            // Gravity: [0, 0, 1]
+            rotateAndScaleVector(q0, q1, q2, q3, 0.0, 0.0, 2.0 * gravity, gx,
+                                 gy, gz);
+            break;
+    }
+}

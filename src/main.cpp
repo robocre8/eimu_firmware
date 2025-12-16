@@ -25,7 +25,8 @@ void setup()
 {
   loadStoredParams();
 
-  Serial.begin(115200);
+  Serial.begin(56700);
+  // Serial.begin(115200);
   // Serial.begin(460800);
   // Serial.begin(921600);
 
@@ -186,16 +187,17 @@ void loop()
     //----------------------------------------------------//
 
     //---- accelerometer precessing - remove gravity -----//
-    if (worldFrameId == 0 || worldFrameId == 1){ // NWU (0) or ENU (1)
-      gx = g * (2*qx*qz - 2*qy*qw);
-      gy = g * (2*qy*qz + 2*qx*qw);
-      gz = g * (1 - 2*qx*qx - 2*qy*qy);
-    } else { //NED (2)
-      gx = g * (2*qx*qz + 2*qy*qw);
-      gy = g * (2*qy*qz - 2*qx*qw);
-      gz = g * (1 - 2*qx*qx - 2*qy*qy);
-    }
-    
+    // if (worldFrameId == 0 || worldFrameId == 1){ // NWU (0) or ENU (1)
+    //   gx = g * (2*qx*qz - 2*qy*qw);
+    //   gy = g * (2*qy*qz + 2*qx*qw);
+    //   gz = g * (1 - 2*qx*qx - 2*qy*qy);
+    // } else { //NED (2)
+    //   gx = g * (2*qx*qz + 2*qy*qw);
+    //   gy = g * (2*qy*qz - 2*qx*qw);
+    //   gz = g * (1 - 2*qx*qx - 2*qy*qy);
+    // }
+    madgwickFilter.getGravity(gx, gy, gz);
+
     linearAccRaw[0] = accCal[0] - gx;
     linearAccRaw[1] = accCal[1] - gy;
     linearAccRaw[2] = accCal[2] - gz;
