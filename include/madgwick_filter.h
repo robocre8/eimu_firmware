@@ -90,6 +90,8 @@ public:
 
   void madgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay,
                           float az, float mx, float my, float mz);
+
+  void getGravity(float& gx, float& gy, float& gz, float gravity = 9.80665);
 };
 
 #endif // MADGWICK_FILTER_H

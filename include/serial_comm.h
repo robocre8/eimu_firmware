@@ -4,7 +4,7 @@
 #include "command_functions.h"
 
 
-void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
+void processCommand(uint8_t cmd, uint8_t* data) {
 
   gpio_set_level((gpio_num_t)LED_PIN, 1);
   switch (cmd) {
@@ -15,6 +15,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&qx, sizeof(qx));
       Serial.write((uint8_t*)&qy, sizeof(qy));
       Serial.write((uint8_t*)&qz, sizeof(qz));
+      Serial.flush();
       break;
     }
 
@@ -24,6 +25,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&r, sizeof(r));
       Serial.write((uint8_t*)&p, sizeof(p));
       Serial.write((uint8_t*)&y, sizeof(y));
+      Serial.flush();
       break;
     }
 
@@ -33,6 +35,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&r, sizeof(r));
       Serial.write((uint8_t*)&p, sizeof(p));
       Serial.write((uint8_t*)&y, sizeof(y));
+      Serial.flush();
       break;
     }
     case WRITE_RPY_VAR: {
@@ -40,7 +43,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&r, &data[0], sizeof(float));
       memcpy(&p, &data[4], sizeof(float));
       memcpy(&y, &data[8], sizeof(float));
-      float res = writeRPYVariance(r, p, y);
+      writeRPYVariance(r, p, y);
       break;
     }
 
@@ -51,6 +54,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.flush();
       break;
     }
 
@@ -61,6 +65,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.flush();
       break;
     }
 
@@ -71,6 +76,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.flush();
       break;
     }
 
@@ -81,6 +87,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.flush();
       break;
     }
 
@@ -91,6 +98,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.flush();
       break;
     }
     case WRITE_ACC_OFF: {
@@ -98,7 +106,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&ax, &data[0], sizeof(float));
       memcpy(&ay, &data[4], sizeof(float));
       memcpy(&az, &data[8], sizeof(float));
-      float res = writeAccOffset(ax, ay, az);
+      writeAccOffset(ax, ay, az);
       break;
     }
 
@@ -109,6 +117,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
+      Serial.flush();
       break;
     }
     case WRITE_ACC_VAR: {
@@ -116,7 +125,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&ax, &data[0], sizeof(float));
       memcpy(&ay, &data[4], sizeof(float));
       memcpy(&az, &data[8], sizeof(float));
-      float res = writeAccVariance(ax, ay, az);
+      writeAccVariance(ax, ay, az);
       break;
     }
 
@@ -127,6 +136,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
+      Serial.flush();
       break;
     }
 
@@ -137,6 +147,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
+      Serial.flush();
       break;
     }
 
@@ -147,6 +158,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
+      Serial.flush();
       break;
     }
     case WRITE_GYRO_OFF: {
@@ -154,7 +166,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&gx, &data[0], sizeof(float));
       memcpy(&gy, &data[4], sizeof(float));
       memcpy(&gz, &data[8], sizeof(float));
-      float res = writeGyroOffset(gx, gy, gz);
+      writeGyroOffset(gx, gy, gz);
       break;
     }
 
@@ -165,6 +177,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
+      Serial.flush();
       break;
     }
     case WRITE_GYRO_VAR: {
@@ -172,7 +185,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&gx, &data[0], sizeof(float));
       memcpy(&gy, &data[4], sizeof(float));
       memcpy(&gz, &data[8], sizeof(float));
-      float res = writeGyroVariance(gx, gy, gz);
+      writeGyroVariance(gx, gy, gz);
       break;
     }
 
@@ -183,6 +196,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
+      Serial.flush();
       break;
     }
 
@@ -193,6 +207,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
+      Serial.flush();
       break;
     }
 
@@ -203,6 +218,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
+      Serial.flush();
       break;
     }
     case WRITE_MAG_H_OFF: {
@@ -210,7 +226,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&mx, &data[0], sizeof(float));
       memcpy(&my, &data[4], sizeof(float));
       memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagHardOffset(mx, my, mz);
+      writeMagHardOffset(mx, my, mz);
       break;
     }
 
@@ -221,6 +237,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
+      Serial.flush();
       break;
     }
     case WRITE_MAG_S_OFF0: {
@@ -228,7 +245,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&mx, &data[0], sizeof(float));
       memcpy(&my, &data[4], sizeof(float));
       memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagSoftOffset0(mx, my, mz);
+      writeMagSoftOffset0(mx, my, mz);
       break;
     }
 
@@ -239,6 +256,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
+      Serial.flush();
       break;
     }
     case WRITE_MAG_S_OFF1: {
@@ -246,7 +264,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&mx, &data[0], sizeof(float));
       memcpy(&my, &data[4], sizeof(float));
       memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagSoftOffset1(mx, my, mz);
+      writeMagSoftOffset1(mx, my, mz);
       break;
     }
 
@@ -257,6 +275,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
+      Serial.flush();
       break;
     }
     case WRITE_MAG_S_OFF2: {
@@ -264,7 +283,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       memcpy(&mx, &data[0], sizeof(float));
       memcpy(&my, &data[4], sizeof(float));
       memcpy(&mz, &data[8], sizeof(float));
-      float res = writeMagSoftOffset2(mx, my, mz);
+      writeMagSoftOffset2(mx, my, mz);
       break;
     }
 
@@ -272,13 +291,13 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case SET_I2C_ADDR: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float res = setI2cAddress((int)value);
-      Serial.write((uint8_t*)&res, sizeof(res));
+      setI2cAddress((int)value);
       break;
     }
     case GET_I2C_ADDR: {
       float res = getI2cAddress();
       Serial.write((uint8_t*)&res, sizeof(res));
+      Serial.flush();
       break;
     }
 
@@ -286,13 +305,13 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case SET_FILTER_GAIN: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float res = setFilterGain(value);
-      Serial.write((uint8_t*)&res, sizeof(res));
+      float setFilterGain(value);
       break;
     }
     case GET_FILTER_GAIN: {
       float res = getFilterGain();
       Serial.write((uint8_t*)&res, sizeof(res));
+      Serial.flush();
       break;
     }
 
@@ -300,13 +319,13 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case SET_ACC_LPF_CUT_FREQ: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float res = setAccFilterCF(value);
-      Serial.write((uint8_t*)&res, sizeof(res));
+      setAccFilterCF(value);
       break;
     }
     case GET_ACC_LPF_CUT_FREQ: {
       float res = getAccFilterCF();
       Serial.write((uint8_t*)&res, sizeof(res));
+      Serial.flush();
       break;
     }
 
@@ -314,13 +333,13 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case SET_FRAME_ID: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float res = setWorldFrameId((int)value);
-      Serial.write((uint8_t*)&res, sizeof(res));
+      setWorldFrameId((int)value);
       break;
     }
     case GET_FRAME_ID: {
       float res = getWorldFrameId();
       Serial.write((uint8_t*)&res, sizeof(res));
+      Serial.flush();
       break;
     }
 
@@ -328,6 +347,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case RESET_PARAMS: {
       float res = triggerResetParams();
       Serial.write((uint8_t*)&res, sizeof(res));
+      Serial.flush();
       break;
     }
 
@@ -342,6 +362,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
+      Serial.flush();
       break;
     }
 
@@ -360,6 +381,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
+      Serial.flush();
       break;
     }
 
@@ -367,6 +389,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case CLEAR_DATA_BUFFER: {
       float res = clearDataBuffer();
       Serial.write((uint8_t*)&res, sizeof(res));
+      Serial.flush();
       break;
     }
 
@@ -374,6 +397,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     default: {
       float error = 0.0;
       Serial.write((uint8_t*)&error, sizeof(error));
+      Serial.flush();
       break;
     }
   }
@@ -391,7 +415,7 @@ void processCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 void recieve_and_send_data() {
   static uint8_t state = 0;
   static uint8_t cmd, length;
-  static uint8_t buffer[32];
+  static uint8_t buffer[40];
   static uint8_t index = 0;
   static uint8_t checksum = 0;
 
@@ -432,10 +456,11 @@ void recieve_and_send_data() {
 
       case 4: // Checksum
         if ((checksum & 0xFF) == b) {
-          processCommand(cmd, buffer, length);
+          processCommand(cmd, buffer);
         } else {
           float error = 0.0;
           Serial.write((uint8_t*)&error, sizeof(error));
+          Serial.flush();
         }
         state = 0; // reset for next packet
         break;

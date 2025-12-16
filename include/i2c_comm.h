@@ -123,8 +123,8 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     case SET_FRAME_ID: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float res = setWorldFrameId((int)value);
-      prepareResponse1(res);
+      setWorldFrameId((int)value);
+      gpio_set_level((gpio_num_t)LED_PIN, 0);
       break;
     }
     case GET_FRAME_ID: {
