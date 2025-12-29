@@ -15,7 +15,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&qx, sizeof(qx));
       Serial.write((uint8_t*)&qy, sizeof(qy));
       Serial.write((uint8_t*)&qz, sizeof(qz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -25,7 +25,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&r, sizeof(r));
       Serial.write((uint8_t*)&p, sizeof(p));
       Serial.write((uint8_t*)&y, sizeof(y));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -35,7 +35,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&r, sizeof(r));
       Serial.write((uint8_t*)&p, sizeof(p));
       Serial.write((uint8_t*)&y, sizeof(y));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_RPY_VAR: {
@@ -54,7 +54,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -65,7 +65,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -76,7 +76,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -87,7 +87,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -98,7 +98,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_ACC_OFF: {
@@ -117,7 +117,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_ACC_VAR: {
@@ -136,7 +136,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -147,7 +147,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -158,7 +158,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_GYRO_OFF: {
@@ -177,7 +177,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_GYRO_VAR: {
@@ -196,7 +196,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -207,7 +207,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -218,7 +218,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_MAG_H_OFF: {
@@ -237,7 +237,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_MAG_S_OFF0: {
@@ -256,7 +256,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_MAG_S_OFF1: {
@@ -275,7 +275,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&mx, sizeof(mx));
       Serial.write((uint8_t*)&my, sizeof(my));
       Serial.write((uint8_t*)&mz, sizeof(mz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
     case WRITE_MAG_S_OFF2: {
@@ -297,7 +297,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case GET_I2C_ADDR: {
       float res = getI2cAddress();
       Serial.write((uint8_t*)&res, sizeof(res));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -305,13 +305,13 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case SET_FILTER_GAIN: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float setFilterGain(value);
+      setFilterGain(value);
       break;
     }
     case GET_FILTER_GAIN: {
       float res = getFilterGain();
       Serial.write((uint8_t*)&res, sizeof(res));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -325,7 +325,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case GET_ACC_LPF_CUT_FREQ: {
       float res = getAccFilterCF();
       Serial.write((uint8_t*)&res, sizeof(res));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -339,7 +339,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case GET_FRAME_ID: {
       float res = getWorldFrameId();
       Serial.write((uint8_t*)&res, sizeof(res));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -347,7 +347,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case RESET_PARAMS: {
       float res = triggerResetParams();
       Serial.write((uint8_t*)&res, sizeof(res));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -362,7 +362,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -381,7 +381,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
       Serial.write((uint8_t*)&gx, sizeof(gx));
       Serial.write((uint8_t*)&gy, sizeof(gy));
       Serial.write((uint8_t*)&gz, sizeof(gz));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -389,7 +389,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case CLEAR_DATA_BUFFER: {
       float res = clearDataBuffer();
       Serial.write((uint8_t*)&res, sizeof(res));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
 
@@ -397,7 +397,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     default: {
       float error = 0.0;
       Serial.write((uint8_t*)&error, sizeof(error));
-      Serial.flush();
+      //Serial.flush();
       break;
     }
   }
@@ -460,7 +460,7 @@ void recieve_and_send_data() {
         } else {
           float error = 0.0;
           Serial.write((uint8_t*)&error, sizeof(error));
-          Serial.flush();
+          //Serial.flush();
         }
         state = 0; // reset for next packet
         break;

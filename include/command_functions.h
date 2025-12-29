@@ -86,7 +86,7 @@ int status;
 
 MadgwickFilter madgwickFilter;
 
-float filterGain = 0.1;
+float filterGain = 0.5;
 int worldFrameId = 1; // 0 - NWU,  1 - ENU,  2 - NED
 
 // initial i2cAddress
@@ -217,7 +217,7 @@ void resetParamsInStorage(){
     storage.putFloat(magAmatR1_key[i], 0.0);
     storage.putFloat(magAmatR2_key[i], 0.0);
   }
-  storage.putFloat(filterGain_key, 0.1);
+  storage.putFloat(filterGain_key, 0.5);
   storage.putFloat(cutOffFreq_key, 1.0);
   storage.putInt(worldFrameId_key, 1);
   storage.putUChar(i2cAddress_key, 0x68);
@@ -257,7 +257,7 @@ void loadStoredParams(){
     magAmat[1][i] = storage.getFloat(magAmatR1_key[i], 0.0);
     magAmat[2][i] = storage.getFloat(magAmatR2_key[i], 0.0);
   }
-  filterGain = storage.getFloat(filterGain_key, 0.1);
+  filterGain = storage.getFloat(filterGain_key, 0.5);
   cutOffFreq = storage.getFloat(cutOffFreq_key, 1.0);
   worldFrameId = storage.getInt(worldFrameId_key, 1);
   i2cAddress = storage.getUChar(i2cAddress_key, 0x68);
