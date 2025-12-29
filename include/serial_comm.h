@@ -305,7 +305,7 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     case SET_FILTER_GAIN: {
       float value;
       memcpy(&value, &data[1], sizeof(float));
-      float setFilterGain(value);
+      setFilterGain(value);
       break;
     }
     case GET_FILTER_GAIN: {
