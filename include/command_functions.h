@@ -16,8 +16,8 @@ const uint8_t READ_RPY_VAR = 0x03;
 const uint8_t WRITE_RPY_VAR = 0x04;
 const uint8_t READ_ACC = 0x05;
 const uint8_t READ_ACC_RAW = 0x06;
-const uint8_t READ_ACC_OFF = 0x07;
-const uint8_t WRITE_ACC_OFF = 0x08;
+// const uint8_t READ_ACC_OFF = 0x07;
+// const uint8_t WRITE_ACC_OFF = 0x08;
 const uint8_t READ_ACC_VAR = 0x09;
 const uint8_t WRITE_ACC_VAR = 0x0A;
 const uint8_t READ_GYRO = 0x0B;
@@ -51,6 +51,15 @@ const uint8_t SET_ACC_LPF_CUT_FREQ = 0x29;
 const uint8_t GET_ACC_LPF_CUT_FREQ = 0x2A;
 const uint8_t READ_LIN_ACC_RAW = 0x2B;
 const uint8_t READ_LIN_ACC = 0x2C;
+
+const uint8_t READ_ACC_BIAS_VECT = 0x2D;
+const uint8_t WRITE_ACC_BIAS_VECT = 0x2E;
+const uint8_t READ_ACC_SCALE_MAT0 = 0x2F;
+const uint8_t WRITE_ACC_SCALE_MAT0 = 0x30;
+const uint8_t READ_ACC_SCALE_MAT1 = 0x31;
+const uint8_t WRITE_ACC_SCALE_MAT1 = 0x32;
+const uint8_t READ_ACC_SCALE_MAT2 = 0x33;
+const uint8_t WRITE_ACC_SCALE_MAT2 = 0x34;
 //---------------------------------------------------//
 
 int LED_PIN = 2;
@@ -107,10 +116,12 @@ AdaptiveLowPassFilter accLPF[3] = {
 };
 
 //-------------- IMU MPU6050 ---------------------//
-float accOff[3];
-float accVar[3];
 float accRaw[3];
 float accCal[3];
+float accScaleMat[3][3];
+float accBiasVect[3];
+float acc_vect[3];
+float accVar[3];
 
 float linearAccRaw[3];
 float linearAcc[3];
@@ -143,10 +154,28 @@ const char * rpyVar_key[3] = {
   "rpyVar2",
 };
 
-const char * accOff_key[3] = {
-  "accOff0",
-  "accOff1",
-  "accOff2",
+const char * accBiasVect_key[3] = {
+  "accBiasVect0",
+  "accBiasVect1",
+  "accBiasVect2",
+};
+
+const char * accScaleMatR0_key[3] = {
+  "accScaleMat00",
+  "accScaleMat01",
+  "accScaleMat02",
+};
+
+const char * accScaleMatR1_key[3] = {
+  "accScaleMat10",
+  "accScaleMat11",
+  "accScaleMat12",
+};
+
+const char * accScaleMatR2_key[3] = {
+  "accScaleMat20",
+  "accScaleMat21",
+  "accScaleMat22",
 };
 
 const char * accVar_key[3] = {
@@ -207,7 +236,10 @@ void resetParamsInStorage(){
   storage.begin(params_ns, false);
 
   for (int i=0; i<3; i+=1){
-    storage.putFloat(accOff_key[i], 0.0);
+    storage.putFloat(accBiasVect_key[i], 0.0);
+    storage.putFloat(accScaleMatR0_key[i], 0.0);
+    storage.putFloat(accScaleMatR1_key[i], 0.0);
+    storage.putFloat(accScaleMatR2_key[i], 0.0);
     storage.putFloat(accVar_key[i], 0.0);
     storage.putFloat(gyroOff_key[i], 0.0);
     storage.putFloat(gyroVar_key[i], 0.0);
@@ -247,7 +279,10 @@ void loadStoredParams(){
   storage.begin(params_ns, true);
 
   for (int i=0; i<3; i+=1){
-    accOff[i] = storage.getFloat(accOff_key[i], 0.0);
+    accBiasVect[i] = storage.getFloat(accBiasVect_key[i], 0.0);
+    accScaleMat[0][i] = storage.getFloat(accScaleMatR0_key[i], 0.0);
+    accScaleMat[1][i] = storage.getFloat(accScaleMatR1_key[i], 0.0);
+    accScaleMat[2][i] = storage.getFloat(accScaleMatR2_key[i], 0.0);
     accVar[i] = storage.getFloat(accVar_key[i], 0.0);
     gyroOff[i] = storage.getFloat(gyroOff_key[i], 0.0);
     gyroVar[i] = storage.getFloat(gyroVar_key[i], 0.0);
@@ -463,26 +498,84 @@ void readAccRaw(float &ax, float &ay, float &az)
   az = accRaw[2];
 }
 
-
-void readAccOffset(float &ax, float &ay, float &az)
+void readAccBias(float &x, float &y, float &z)
 {
-  ax = accOff[0];
-  ay = accOff[1];
-  az = accOff[2];
+  x = accBiasVect[0];
+  y = accBiasVect[1];
+  z = accBiasVect[2];
 }
-float writeAccOffset(float ax, float ay, float az) {
-  float accVal[3] = {ax, ay, az};
+float writeAccBias(float x, float y, float z) {
+  float accBiasVectVal[3] = {x, y, z};
   for (int i = 0; i < 3; i += 1)
   {
-    accOff[i] = accVal[i];
+    accBiasVect[i] = accBiasVectVal[i];
     storage.begin(params_ns, false);
-    storage.putFloat(accOff_key[i], accOff[i]);
+    storage.putFloat(accBiasVect_key[i], accBiasVect[i]);
     storage.end();
   }
 
   return 1.0;
 }
 
+
+void readAccScaleMatR0(float &x, float &y, float &z)
+{
+  x = accScaleMat[0][0];
+  y = accScaleMat[0][1];
+  z = accScaleMat[0][2];
+}
+float writeAccScaleMatR0(float x, float y, float z) {
+  float accScaleVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    accScaleMat[0][i] = accScaleVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(accScaleMatR0_key[i], accScaleMat[0][i]);
+    storage.end();
+  }
+
+  return 1.0;
+}
+
+
+void readAccScaleMatR1(float &x, float &y, float &z)
+{
+  x = accScaleMat[1][0];
+  y = accScaleMat[1][1];
+  z = accScaleMat[1][2];
+}
+float writeAccScaleMatR1(float x, float y, float z) {
+  float accScaleVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    accScaleMat[1][i] = accScaleVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(accScaleMatR1_key[i], accScaleMat[1][i]);
+    storage.end();
+  }
+
+  return 1.0;
+}
+
+
+void readAccScaleMatR2(float &x, float &y, float &z)
+{
+  x = accScaleMat[2][0];
+  y = accScaleMat[2][1];
+  z = accScaleMat[2][2];
+}
+float writeAccScaleMatR2(float x, float y, float z) {
+  float accScaleVal[3] = {x, y, z};
+  for (int i = 0; i < 3; i += 1)
+  {
+    accScaleMat[2][i] = accScaleVal[i];
+    storage.begin(params_ns, false);
+    storage.putFloat(accScaleMatR2_key[i], accScaleMat[2][i]);
+    storage.end();
+  }
+
+  return 1.0;
+}
 
 void readAccVariance(float &ax, float &ay, float &az)
 {

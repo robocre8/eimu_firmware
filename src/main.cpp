@@ -82,7 +82,7 @@ void loop()
     float _mx, _my, _mz;
     float r, p, y;
     float qw, qx, qy, qz;
-    float g=9.8, gx, gy, gz;
+    float gx, gy, gz;
 
     //------------READ SENSOR DATA IN ENU FRAME---------------//
     accRaw[0] = imu.getAccelY_mss();
@@ -99,16 +99,26 @@ void loop()
     //--------------------------------------------------------//
 
     //---------------CALIBRATE SENSOR DATA IN ENU FRAME -----------------//
-    // calibrate acc data
-    _ax = accRaw[0] - accOff[0];
-    _ay = accRaw[1] - accOff[1];
-    _az = accRaw[2] - accOff[2];
 
     // calibrate gyro data
     _gx = gyroRaw[0] - gyroOff[0];
     _gy = gyroRaw[1] - gyroOff[1];
     _gz = gyroRaw[2] - gyroOff[2];
 
+    // calibrate acc data
+    // acc_vect = accRaw - accBiasVect
+    acc_vect[0] = accRaw[0] - accBiasVect[0];
+    acc_vect[1] = accRaw[1] - accBiasVect[1];
+    acc_vect[2] = accRaw[2] - accBiasVect[2];
+
+    // accCal = accScaleMat * mag_vect
+    vectOp.transform(acc_vect, accScaleMat, acc_vect);
+
+    _ax = acc_vect[0];
+    _ay = acc_vect[1];
+    _az = acc_vect[2];
+
+    // calibrate mag data
     // mag_vect = magRaw - b_vect
     mag_vect[0] = magRaw[0] - magBvect[0];
     mag_vect[1] = magRaw[1] - magBvect[1];

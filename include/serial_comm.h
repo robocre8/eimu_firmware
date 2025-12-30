@@ -92,21 +92,78 @@ void processCommand(uint8_t cmd, uint8_t* data) {
     }
 
 
-    case READ_ACC_OFF: {
+    case READ_ACC_BIAS_VECT: {
       float ax, ay, az;
-      readAccOffset(ax, ay, az);
+      readAccBias(ax, ay, az);
       Serial.write((uint8_t*)&ax, sizeof(ax));
       Serial.write((uint8_t*)&ay, sizeof(ay));
       Serial.write((uint8_t*)&az, sizeof(az));
       //Serial.flush();
       break;
     }
-    case WRITE_ACC_OFF: {
+    case WRITE_ACC_BIAS_VECT: {
       float ax, ay, az;
       memcpy(&ax, &data[0], sizeof(float));
       memcpy(&ay, &data[4], sizeof(float));
       memcpy(&az, &data[8], sizeof(float));
-      writeAccOffset(ax, ay, az);
+      writeAccBias(ax, ay, az);
+      break;
+    }
+
+
+    case READ_ACC_SCALE_MAT0: {
+      float ax, ay, az;
+      readAccScaleMatR0(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      //Serial.flush();
+      break;
+    }
+    case WRITE_ACC_SCALE_MAT0: {
+      float ax, ay, az;
+      memcpy(&ax, &data[0], sizeof(float));
+      memcpy(&ay, &data[4], sizeof(float));
+      memcpy(&az, &data[8], sizeof(float));
+      writeAccScaleMatR0(ax, ay, az);
+      break;
+    }
+
+
+    case READ_ACC_SCALE_MAT1: {
+      float ax, ay, az;
+      readAccScaleMatR1(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      //Serial.flush();
+      break;
+    }
+    case WRITE_ACC_SCALE_MAT1: {
+      float ax, ay, az;
+      memcpy(&ax, &data[0], sizeof(float));
+      memcpy(&ay, &data[4], sizeof(float));
+      memcpy(&az, &data[8], sizeof(float));
+      writeAccScaleMatR1(ax, ay, az);
+      break;
+    }
+
+
+    case READ_ACC_SCALE_MAT2: {
+      float ax, ay, az;
+      readAccScaleMatR2(ax, ay, az);
+      Serial.write((uint8_t*)&ax, sizeof(ax));
+      Serial.write((uint8_t*)&ay, sizeof(ay));
+      Serial.write((uint8_t*)&az, sizeof(az));
+      //Serial.flush();
+      break;
+    }
+    case WRITE_ACC_SCALE_MAT2: {
+      float ax, ay, az;
+      memcpy(&ax, &data[0], sizeof(float));
+      memcpy(&ay, &data[4], sizeof(float));
+      memcpy(&az, &data[8], sizeof(float));
+      writeAccScaleMatR2(ax, ay, az);
       break;
     }
 
