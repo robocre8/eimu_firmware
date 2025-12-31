@@ -40,95 +40,90 @@ void prepareResponse3(float res0, float res1, float res2) {
 void i2c_runCommand() {
   gpio_set_level((gpio_num_t)LED_PIN, 1);
 
-  float r0 = 0.0f;
-  float r1 = 0.0f;
-  float r2 = 0.0f;
+  float x = 0.0f;
+  float y = 0.0f;
+  float z = 0.0f;
 
   switch (i2c_cmd) {
 
     case READ_RPY: {
-      float x, y, z;
       readRPY(x, y, z);
       prepareResponse3(x, y, z);
       break;
     }
 
     case READ_RPY_VAR: {
-      float x, y, z;
       readRPYVariance(x, y, z);
       prepareResponse3(x, y, z);
       break;
     }
 
     case READ_GYRO: {
-      float x, y, z;
       readGyro(x, y, z);
       prepareResponse3(x, y, z);
       break;
     }
 
     case READ_GYRO_VAR: {
-      float x, y, z;
       readGyroVariance(x, y, z);
       prepareResponse3(x, y, z);
       break;
     }
 
     // case READ_ACC: {
-    //   float x, y, z;
     //   readAcc(x, y, z);
     //   prepareResponse3(x, y, z);
     //   break;
     // }
     
     case READ_LIN_ACC: {
-      float x, y, z;
       readLinearAcc(x, y, z);
       prepareResponse3(x, y, z);
       break;
     }
 
     case READ_ACC_VAR: {
-      float x, y, z;
       readAccVariance(x, y, z);
       prepareResponse3(x, y, z);
       break;
     }
 
     case SET_FILTER_GAIN: {
-      setFilterGain((double)arg2);
+      setFilterGain((double)i2c_arg2);
+      gpio_set_level((gpio_num_t)LED_PIN, 0);
       break;
     }
 
     case GET_FILTER_GAIN: {
-      float res = getFilterGain();
-      send_data(res);
+      x = getFilterGain();
+      prepareResponse3(x, y, z);
       break;
     }
 
     
     case SET_FRAME_ID: {
-      setWorldFrameId((int)arg2);
+      setWorldFrameId((int)i2c_arg2);
+      gpio_set_level((gpio_num_t)LED_PIN, 0);
       break;
     }
 
     case GET_FRAME_ID: {
-      float res = getWorldFrameId();
-      send_data(res);
+      x = getWorldFrameId();
+      prepareResponse3(x, y, z);
       break;
     }
 
     case RESET: {
       //reset all stored parameters return 1.0 if successfull
-      float res = triggerResetParams();
-      send_data(res);
+      x = triggerResetParams();
+      prepareResponse3(x, y, z);
       break;
     }
 
     case CLEAR: {
       // clear all inintializing variables
-      float res = clearDataBuffer();
-      send_data(res);
+      x = clearDataBuffer();
+      prepareResponse3(x, y, z);
       break;
     }
   }
