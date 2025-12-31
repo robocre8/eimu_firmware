@@ -9,51 +9,51 @@
 #include <adaptive_low_pass_filter.h>
 
 //------------ Communication Command IDs --------------//
-const uint8_t START_BYTE = 0xBB;
-const uint8_t READ_QUAT = 0x01;
-const uint8_t READ_RPY = 0x02;
-const uint8_t READ_RPY_VAR = 0x03;
-const uint8_t WRITE_RPY_VAR = 0x04;
-const uint8_t READ_ACC = 0x05;
-const uint8_t READ_ACC_RAW = 0x06;
-const uint8_t READ_ACC_OFF = 0x07;
-const uint8_t WRITE_ACC_OFF = 0x08;
-const uint8_t READ_ACC_VAR = 0x09;
-const uint8_t WRITE_ACC_VAR = 0x0A;
-const uint8_t READ_GYRO = 0x0B;
-const uint8_t READ_GYRO_RAW = 0x0C;
-const uint8_t READ_GYRO_OFF = 0x0D;
-const uint8_t WRITE_GYRO_OFF = 0x0E;
-const uint8_t READ_GYRO_VAR = 0x0F;
-const uint8_t WRITE_GYRO_VAR = 0x10;
-const uint8_t READ_MAG = 0x11;
-const uint8_t READ_MAG_RAW = 0x12;
-const uint8_t READ_MAG_H_OFF = 0x13;
-const uint8_t WRITE_MAG_H_OFF = 0x14;
-const uint8_t READ_MAG_S_OFF0 = 0x15;
-const uint8_t WRITE_MAG_S_OFF0 = 0x16;
-const uint8_t READ_MAG_S_OFF1 = 0x17;
-const uint8_t WRITE_MAG_S_OFF1 = 0x18;
-const uint8_t READ_MAG_S_OFF2 = 0x19;
-const uint8_t WRITE_MAG_S_OFF2 = 0x1A;
-const uint8_t SET_I2C_ADDR = 0x1B;
-const uint8_t GET_I2C_ADDR = 0x1C;
-const uint8_t SET_FILTER_GAIN = 0x1D;
-const uint8_t GET_FILTER_GAIN = 0x1E;
-const uint8_t SET_FRAME_ID = 0x1F;
-const uint8_t GET_FRAME_ID = 0x20;
-const uint8_t RESET_PARAMS = 0x21;
-// const uint8_t READ_QUAT_RPY = 0x22;
-const uint8_t READ_ACC_GYRO = 0x23;
-const uint8_t CLEAR_DATA_BUFFER = 0x27;
-const uint8_t READ_IMU_DATA = 0x28;
-const uint8_t SET_ACC_LPF_CUT_FREQ = 0x29;
-const uint8_t GET_ACC_LPF_CUT_FREQ = 0x2A;
-const uint8_t READ_LIN_ACC_RAW = 0x2B;
-const uint8_t READ_LIN_ACC = 0x2C;
+#define READ_RPY 10
+#define READ_RPY_VAR 11
+#define WRITE_RPY_VAR 12
+
+#define READ_GYRO 13
+#define READ_GYRO_RAW 14
+#define READ_GYRO_OFF 15
+#define WRITE_GYRO_OFF 16
+#define READ_GYRO_VAR 17
+#define WRITE_GYRO_VAR 18
+
+#define READ_ACC 19
+#define READ_ACC_RAW 20
+#define READ_ACC_OFF 21
+#define WRITE_ACC_OFF 22
+#define READ_ACC_VAR 23
+#define WRITE_ACC_VAR 24
+#define READ_LIN_ACC_RAW 25
+#define READ_LIN_ACC 26
+#define SET_ACC_LPF_CUT_FREQ 27
+#define GET_ACC_LPF_CUT_FREQ 28
+
+#define READ_MAG 29
+#define READ_MAG_RAW 30
+#define READ_MAG_H_OFF 31
+#define WRITE_MAG_H_OFF 32
+#define READ_MAG_S_OFF0 33
+#define WRITE_MAG_S_OFF0 34
+#define READ_MAG_S_OFF1 35
+#define WRITE_MAG_S_OFF1 36
+#define READ_MAG_S_OFF2 37
+#define WRITE_MAG_S_OFF2 38
+
+#define SET_I2C_ADDR 39
+#define GET_I2C_ADDR 40
+#define SET_FILTER_GAIN 41
+#define GET_FILTER_GAIN 42
+#define SET_FRAME_ID 43
+#define GET_FRAME_ID 44
+#define RESET 45
+#define CLEAR 46
 //---------------------------------------------------//
 
 int LED_PIN = 2;
+char null_char = '\0';
 
 //--------------- global variables -----------------//
 /* Mpu9250 object, SPI bus, CS on pin 7
@@ -398,15 +398,6 @@ float getAccFilterCF()
 
 
 //------------------------------------------------------------------//
-void readQuat(float &qw, float &qx, float &qy, float &qz)
-{
-  qw = quat[0];
-  qx = quat[1];
-  qy = quat[2];
-  qz = quat[3];
-}
-
-
 void readRPY(float &r, float &p, float &y)
 {
   r = rpy[0];
