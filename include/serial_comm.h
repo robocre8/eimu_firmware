@@ -32,17 +32,19 @@ void resetCommand() {
 void runCommand() {
   gpio_set_level((gpio_num_t)LED_PIN, 1);
 
+  float x = 0.0f;
+  float y = 0.0f;
+  float z = 0.0f;
+
   switch (cmd) {
   
     case READ_RPY: {
-      float x, y, z;
       readRPY(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_RPY_VAR: {
-      float x, y, z;
       readRPYVariance(x, y, z);
       send_data(x, y, z);
       break;
@@ -54,21 +56,18 @@ void runCommand() {
     }
 
     case READ_GYRO: {
-      float x, y, z;
       readGyro(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_GYRO_RAW: {
-      float x, y, z;
       readGyroRaw(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_GYRO_OFF: {
-      float x, y, z;
       readGyroOffset(x, y, z);
       send_data(x, y, z);
       break;
@@ -80,7 +79,6 @@ void runCommand() {
     }
 
     case READ_GYRO_VAR: {
-      float x, y, z;
       readGyroVariance(x, y, z);
       send_data(x, y, z);
       break;
@@ -92,21 +90,18 @@ void runCommand() {
     }
 
     case READ_ACC: {
-      float x, y, z;
       readAcc(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_ACC_RAW: {
-      float x, y, z;
       readAccRaw(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_ACC_OFF: {
-      float x, y, z;
       readAccOffset(x, y, z);
       send_data(x, y, z);
       break;
@@ -118,7 +113,6 @@ void runCommand() {
     }
 
     case READ_ACC_VAR: {
-      float x, y, z;
       readAccVariance(x, y, z);
       send_data(x, y, z);
       break;
@@ -130,14 +124,12 @@ void runCommand() {
     }
 
     case READ_LIN_ACC: {
-      float x, y, z;
       readLinearAcc(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_LIN_ACC_RAW: {
-      float x, y, z;
       readLinearAccRaw(x, y, z);
       send_data(x, y, z);
       break;
@@ -149,27 +141,24 @@ void runCommand() {
     }
 
     case GET_ACC_LPF_CUT_FREQ: {
-      float res = getAccFilterCF();
-      send_data(res);
+      x = getAccFilterCF();
+      send_data(x, y, z);
       break;
     }
 
     case READ_MAG: {
-      float x, y, z;
       readMag(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_MAG_RAW: {
-      float x, y, z;
       readMagRaw(x, y, z);
       send_data(x, y, z);
       break;
     }
 
     case READ_MAG_H_OFF: {
-      float x, y, z;
       readMagHardOffset(x, y, z);
       send_data(x, y, z);
       break;
@@ -181,7 +170,6 @@ void runCommand() {
     }
 
     case READ_MAG_S_OFF0: {
-      float x, y, z;
       readMagSoftOffset0(x, y, z);
       send_data(x, y, z);
       break;
@@ -193,7 +181,6 @@ void runCommand() {
     }
 
     case READ_MAG_S_OFF1: {
-      float x, y, z;
       readMagSoftOffset1(x, y, z);
       send_data(x, y, z);
       break;
@@ -205,7 +192,6 @@ void runCommand() {
     }
 
     case READ_MAG_S_OFF2: {
-      float x, y, z;
       readMagSoftOffset2(x, y, z);
       send_data(x, y, z);
       break;
@@ -222,8 +208,8 @@ void runCommand() {
     }
 
     case GET_I2C_ADDR: {
-      float res = getI2cAddress();
-      send_data(res);
+      x = getI2cAddress();
+      send_data(x, y, z);
       break;
     }
 
@@ -234,8 +220,8 @@ void runCommand() {
     }
 
     case GET_FILTER_GAIN: {
-      float res = getFilterGain();
-      send_data(res);
+      x = getFilterGain();
+      send_data(x, y, z);
       break;
     }
 
@@ -246,22 +232,22 @@ void runCommand() {
     }
 
     case GET_FRAME_ID: {
-      float res = getWorldFrameId();
-      send_data(res);
+      x = getWorldFrameId();
+      send_data(x, y, z);
       break;
     }
 
     case RESET: {
       //reset all stored parameters return 1.0 if successfull
-      float res = triggerResetParams();
-      send_data(res);
+      x = triggerResetParams();
+      send_data(x, y, z);
       break;
     }
 
     case CLEAR: {
       // clear all inintializing variables
-      float res = clearDataBuffer();
-      send_data(res);
+      x = clearDataBuffer();
+      send_data(x, y, z);
       break;
     }
   }
