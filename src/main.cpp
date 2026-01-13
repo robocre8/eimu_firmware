@@ -25,8 +25,8 @@ void setup()
 {
   loadStoredParams();
 
-  Serial.begin(56700);
-  // Serial.begin(115200);
+  // Serial.begin(56700);
+  Serial.begin(115200);
   // Serial.begin(460800);
   // Serial.begin(921600);
 
