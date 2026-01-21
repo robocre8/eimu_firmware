@@ -9,51 +9,53 @@
 #include <adaptive_low_pass_filter.h>
 
 //------------ Communication Command IDs --------------//
-const uint8_t START_BYTE = 0xBB;
-const uint8_t READ_QUAT = 0x01;
-const uint8_t READ_RPY = 0x02;
-const uint8_t READ_RPY_VAR = 0x03;
-const uint8_t WRITE_RPY_VAR = 0x04;
-const uint8_t READ_ACC = 0x05;
-const uint8_t READ_ACC_RAW = 0x06;
-const uint8_t READ_ACC_OFF = 0x07;
-const uint8_t WRITE_ACC_OFF = 0x08;
-const uint8_t READ_ACC_VAR = 0x09;
-const uint8_t WRITE_ACC_VAR = 0x0A;
-const uint8_t READ_GYRO = 0x0B;
-const uint8_t READ_GYRO_RAW = 0x0C;
-const uint8_t READ_GYRO_OFF = 0x0D;
-const uint8_t WRITE_GYRO_OFF = 0x0E;
-const uint8_t READ_GYRO_VAR = 0x0F;
-const uint8_t WRITE_GYRO_VAR = 0x10;
-const uint8_t READ_MAG = 0x11;
-const uint8_t READ_MAG_RAW = 0x12;
-const uint8_t READ_MAG_H_OFF = 0x13;
-const uint8_t WRITE_MAG_H_OFF = 0x14;
-const uint8_t READ_MAG_S_OFF0 = 0x15;
-const uint8_t WRITE_MAG_S_OFF0 = 0x16;
-const uint8_t READ_MAG_S_OFF1 = 0x17;
-const uint8_t WRITE_MAG_S_OFF1 = 0x18;
-const uint8_t READ_MAG_S_OFF2 = 0x19;
-const uint8_t WRITE_MAG_S_OFF2 = 0x1A;
-const uint8_t SET_I2C_ADDR = 0x1B;
-const uint8_t GET_I2C_ADDR = 0x1C;
-const uint8_t SET_FILTER_GAIN = 0x1D;
-const uint8_t GET_FILTER_GAIN = 0x1E;
-const uint8_t SET_FRAME_ID = 0x1F;
-const uint8_t GET_FRAME_ID = 0x20;
-const uint8_t RESET_PARAMS = 0x21;
-// const uint8_t READ_QUAT_RPY = 0x22;
-const uint8_t READ_ACC_GYRO = 0x23;
-const uint8_t CLEAR_DATA_BUFFER = 0x27;
-const uint8_t READ_IMU_DATA = 0x28;
-const uint8_t SET_ACC_LPF_CUT_FREQ = 0x29;
-const uint8_t GET_ACC_LPF_CUT_FREQ = 0x2A;
-const uint8_t READ_LIN_ACC_RAW = 0x2B;
-const uint8_t READ_LIN_ACC = 0x2C;
+enum CommandID : uint8_t {
+  START_BYTE = 0xBB,
+  READ_QUAT = 0x01,
+  READ_RPY = 0x02,
+  READ_RPY_VAR = 0x03,
+  WRITE_RPY_VAR = 0x04,
+  READ_ACC = 0x05,
+  READ_ACC_RAW = 0x06,
+  READ_ACC_OFF = 0x07,
+  WRITE_ACC_OFF = 0x08,
+  READ_ACC_VAR = 0x09,
+  WRITE_ACC_VAR = 0x0A,
+  READ_GYRO = 0x0B,
+  READ_GYRO_RAW = 0x0C,
+  READ_GYRO_OFF = 0x0D,
+  WRITE_GYRO_OFF = 0x0E,
+  READ_GYRO_VAR = 0x0F,
+  WRITE_GYRO_VAR = 0x10,
+  READ_MAG = 0x11,
+  READ_MAG_RAW = 0x12,
+  READ_MAG_H_OFF = 0x13,
+  WRITE_MAG_H_OFF = 0x14,
+  READ_MAG_S_OFF0 = 0x15,
+  WRITE_MAG_S_OFF0 = 0x16,
+  READ_MAG_S_OFF1 = 0x17,
+  WRITE_MAG_S_OFF1 = 0x18,
+  READ_MAG_S_OFF2 = 0x19,
+  WRITE_MAG_S_OFF2 = 0x1A,
+  SET_I2C_ADDR = 0x1B,
+  GET_I2C_ADDR = 0x1C,
+  SET_FILTER_GAIN = 0x1D,
+  GET_FILTER_GAIN = 0x1E,
+  SET_FRAME_ID = 0x1F,
+  GET_FRAME_ID = 0x20,
+  RESET_PARAMS = 0x21,
+  // READ_QUAT_RPY = 0x22,
+  READ_ACC_GYRO = 0x23,
+  CLEAR_DATA_BUFFER = 0x27,
+  READ_IMU_DATA = 0x28,
+  SET_ACC_LPF_CUT_FREQ = 0x29,
+  GET_ACC_LPF_CUT_FREQ = 0x2A,
+  READ_LIN_ACC_RAW = 0x2B,
+  READ_LIN_ACC = 0x2C,
+};
 //---------------------------------------------------//
 
-int LED_PIN = 2;
+const int LED_PIN = 2;
 
 //--------------- global variables -----------------//
 /* Mpu9250 object, SPI bus, CS on pin 7
@@ -98,7 +100,7 @@ bool firstLoad = false;
 
 // adaptive lowpass Filter
 const int filterOrder = 1;
-double cutOffFreq = 1.0;
+float cutOffFreq = 1.0;
 
 AdaptiveLowPassFilter accLPF[3] = {
   AdaptiveLowPassFilter(filterOrder, cutOffFreq), // motor 0 velocity filter

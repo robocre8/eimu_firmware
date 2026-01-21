@@ -105,10 +105,10 @@ class MPU9250{
     uint8_t _srd;
     // gyro bias estimation
     size_t _numSamples = 100;
-    double _gxbD, _gybD, _gzbD;
+    float _gxbD, _gybD, _gzbD;
     float _gxb, _gyb, _gzb;
     // accel bias and scale factor estimation
-    double _axbD, _aybD, _azbD;
+    float _axbD, _aybD, _azbD;
     float _axmax, _aymax, _azmax;
     float _axmin, _aymin, _azmin;
     float _axb, _ayb, _azb;
