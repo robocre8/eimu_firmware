@@ -8,6 +8,14 @@
 #include <Wire.h>
 #include <adaptive_low_pass_filter.h>
 
+static_assert(sizeof(float) == 4, "Float must be 32-bit");
+
+float readFloat(const uint8_t* data, uint8_t offset) {
+  float v;
+  memcpy(&v, &data[offset], sizeof(float));
+  return v;
+}
+
 //------------ Communication Command IDs --------------//
 enum CommandID : uint8_t {
   START_BYTE = 0xBB,

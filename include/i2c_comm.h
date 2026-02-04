@@ -9,8 +9,6 @@ static const uint8_t MAX_I2C_BUFFER = 32;
 static uint8_t sendMsgBuffer[MAX_I2C_BUFFER];
 static uint8_t sendMsgLength = 0;
 
-static_assert(sizeof(float) == 4, "Float must be 32-bit");
-
 void clearSendMsgBuffer(){
   memset(sendMsgBuffer, 0, (size_t)MAX_I2C_BUFFER); 
   // for (uint8_t i=0; i< MAX_I2C_BUFFER; i+=1){
@@ -125,10 +123,8 @@ void handleCommand(uint8_t cmd, uint8_t* data) {
     }
 
     case SET_FRAME_ID: {
-      float value;
-      memcpy(&value, &data[1], sizeof(float));
+      float value = readFloat(data, 1);
       setWorldFrameId((int)value);
-      gpio_set_level((gpio_num_t)LED_PIN, 0);
       break;
     }
     case GET_FRAME_ID: {
@@ -157,6 +153,7 @@ void handleCommand(uint8_t cmd, uint8_t* data) {
       break;
     }
   }
+  gpio_set_level((gpio_num_t)LED_PIN, 0);
 }
 
 
@@ -166,7 +163,7 @@ void handleCommand(uint8_t cmd, uint8_t* data) {
 void onRequest() {
   Wire.write(sendMsgBuffer, sendMsgLength);
   clearSendMsgBuffer();
-  gpio_set_level((gpio_num_t)LED_PIN, 0);
+  // gpio_set_level((gpio_num_t)LED_PIN, 0);
   sendMsgLength = 0;
 }
 

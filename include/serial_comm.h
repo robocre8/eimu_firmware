@@ -3,14 +3,6 @@
 
 #include "command_functions.h"
 
-static_assert(sizeof(float) == 4, "Float must be 32-bit");
-
-inline float readFloat(const uint8_t* data, uint8_t offset) {
-  float v;
-  memcpy(&v, &data[offset], sizeof(float));
-  return v;
-}
-
 
 static inline void processCommand(uint8_t cmd, uint8_t* data) {
 
