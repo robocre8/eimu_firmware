@@ -5,15 +5,17 @@
 #include "command_functions.h"
 
 
-const uint8_t MAX_I2C_BUFFER = 32;
+static const uint8_t MAX_I2C_BUFFER = 32;
 static uint8_t sendMsgBuffer[MAX_I2C_BUFFER];
 static uint8_t sendMsgLength = 0;
 
 void clearSendMsgBuffer(){
-  for (uint8_t i=0; i< MAX_I2C_BUFFER; i+=1){
-    sendMsgBuffer[i] = 0x00;
-  }
+  memset(sendMsgBuffer, 0, (size_t)MAX_I2C_BUFFER); 
+  // for (uint8_t i=0; i< MAX_I2C_BUFFER; i+=1){
+  //   sendMsgBuffer[i] = 0x00;
+  // }
 }
+
 // Pack float response into txBuffer
 void prepareResponse1(float res) {
   sendMsgLength = 4;
@@ -46,7 +48,7 @@ void prepareResponse6(float res0, float res1, float res2, float res3, float res4
 }
 
 // Example command handler
-void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
+void handleCommand(uint8_t cmd, uint8_t* data) {
 
   gpio_set_level((gpio_num_t)LED_PIN, 1);
 
@@ -121,10 +123,8 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
     }
 
     case SET_FRAME_ID: {
-      float value;
-      memcpy(&value, &data[1], sizeof(float));
+      float value = readFloat(data, 1);
       setWorldFrameId((int)value);
-      gpio_set_level((gpio_num_t)LED_PIN, 0);
       break;
     }
     case GET_FRAME_ID: {
@@ -153,6 +153,7 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
       break;
     }
   }
+  gpio_set_level((gpio_num_t)LED_PIN, 0);
 }
 
 
@@ -162,7 +163,8 @@ void handleCommand(uint8_t cmd, uint8_t* data, uint8_t length) {
 void onRequest() {
   Wire.write(sendMsgBuffer, sendMsgLength);
   clearSendMsgBuffer();
-  gpio_set_level((gpio_num_t)LED_PIN, 0);
+  // gpio_set_level((gpio_num_t)LED_PIN, 0);
+  sendMsgLength = 0;
 }
 
 // Called when master sends data
@@ -193,10 +195,16 @@ void onReceive(int numBytes) {
       case 2: // Length
         msgLength = b;
         msgChecksum += b;
-        if (msgLength==0){
-          readState = 4;
+
+        if (msgLength > MAX_I2C_BUFFER) {
+          readState = 0;
+          msgChecksum = 0;
+          break;
         }
-        else{
+
+        if (msgLength == 0) {
+          readState = 4;
+        } else {
           msgIndex = 0;
           readState = 3;
         }
@@ -210,11 +218,12 @@ void onReceive(int numBytes) {
 
       case 4: // Checksum
         if ((msgChecksum & 0xFF) == b) {
-          handleCommand(msgCmd, msgBuffer, msgLength);
+          handleCommand(msgCmd, msgBuffer);
         } else {
           float error = 0.0;
           prepareResponse1(error);
         }
+  
         readState = 0; // reset for next packet
         break;
     }
