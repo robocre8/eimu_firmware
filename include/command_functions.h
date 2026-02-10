@@ -290,7 +290,7 @@ float triggerResetParams()
   storage.putBool(firstLoad_key, firstLoad);
   storage.end();
   // reload to reset
-  loadStoredParams();
+  // loadStoredParams();
   return 1.0;
 }
 
@@ -323,29 +323,6 @@ float clearDataBuffer()
   
   return 1.0;
 }
-
-// #include "i2c_comm.h"
-float setI2cAddress(int address)
-{
-  if((address <= 0) || (address > 255)){
-    return 0.0;
-  }
-  else {
-    i2cAddress = (uint8_t)address;
-    storage.begin(params_ns, false);
-    storage.putUChar(i2cAddress_key, i2cAddress);
-    storage.end();
-
-    Wire.begin(i2cAddress);
-
-    return 0.0;
-  }  
-}
-float getI2cAddress()
-{
-  return (float)i2cAddress;
-}
-
 
 float setWorldFrameId(int id)
 {
@@ -664,6 +641,29 @@ float writeMagSoftOffset2(float x, float y, float z) {
   return 1.0;
 }
 //-------------------------------------------------------------------//
+
+
+#include "i2c_comm.h"
+float setI2cAddress(int address)
+{
+  if((address <= 0) || (address > 255)){
+    return 0.0;
+  }
+  else {
+    i2cAddress = (uint8_t)address;
+    storage.begin(params_ns, false);
+    storage.putUChar(i2cAddress_key, i2cAddress);
+    storage.end();
+
+    Wire.begin(i2cAddress);
+
+    return 0.0;
+  }  
+}
+float getI2cAddress()
+{
+  return (float)i2cAddress;
+}
 
 
 #endif
